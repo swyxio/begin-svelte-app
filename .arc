@@ -1,9 +1,5 @@
-# Warning: do not edit
-# --------------------
-# This is a generated file and will be overwritten
-
 @app
-begin-app
+nature-l3r
 
 @static
 
