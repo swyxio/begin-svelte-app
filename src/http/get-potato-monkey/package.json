@@ -1,0 +1,7 @@
+{
+  "name": "begin-app-get-potato-monkey",
+  "dependencies": {
+    "@architect/functions": "latest",
+    "@begin/data": "latest"
+  }
+}
