@@ -1,0 +1,7 @@
+{
+  "name": "begin-app-get-foo-bar-000baz",
+  "dependencies": {
+    "@architect/functions": "latest",
+    "@begin/data": "latest"
+  }
+}
