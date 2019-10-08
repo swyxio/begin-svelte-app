@@ -5,6 +5,7 @@ nature-l3r
 
 @http
 get /api
+get /potato/monkey
 
 @tables
 data
