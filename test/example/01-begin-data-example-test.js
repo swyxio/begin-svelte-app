@@ -20,7 +20,7 @@ test('Start sandbox', async t => {
 })
 
 test('Register author and create item', async t => {
-  t.plan(6)
+  t.plan(7)
   let register = await tiny.post({
     url: `${url}/api`,
     data: { action: 'register', username: 'cathy', password: 'password123' }
@@ -62,6 +62,7 @@ test('Register author and create item', async t => {
     t.fail('Job comment should fail')
   } catch (err) {
     t.equal(err.statusCode, 400, 'Job comments rejected')
+    t.equal(err.body.status, 400, 'Error payload includes status')
   }
 
   await tiny.post({

@@ -169,6 +169,7 @@ exports.handler = async function http (req) {
     return jsonResponse(404, { error: 'Unknown action.' })
   } catch (error) {
     console.error(error)
-    return jsonResponse(error.status || 500, { error: error.message || 'Server error.' })
+    let status = error.status || 500
+    return jsonResponse(status, { error: error.message || 'Server error.', status })
   }
 }
