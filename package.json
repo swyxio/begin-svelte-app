@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start --port 3000",
     "seed": "node scripts/seed.mjs",
+    "dev:fresh": "node scripts/seed.mjs && next dev --port 3000",
     "test:e2e": "node test/e2e.mjs"
   },
   "dependencies": {
