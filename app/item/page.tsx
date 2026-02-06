@@ -103,7 +103,7 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
                 <span className="story-subtext">
                   {item.type !== 'job' && (
                     <>
-                      {item.score} point{item.score !== 1 ? 's' : ''} by{' '}
+                      {`${item.score} point${item.score !== 1 ? 's' : ''} by `}
                       <Link href={`/user?id=${item.by}`}>{item.by}</Link>{' '}
                       {timeAgo(item.created_at)}
                       {user && userVotes.get(item.id) === 'up' && (

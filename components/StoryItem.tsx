@@ -61,7 +61,7 @@ export function StoryItem({ item, rank, userVote, currentUser, showText }: Story
             <td className="story-subtext">
               {!isJob ? (
                 <>
-                  {item.score} point{item.score !== 1 ? 's' : ''} by{' '}
+                  {`${item.score} point${item.score !== 1 ? 's' : ''} by `}
                   <Link href={`/user?id=${item.by}`}>{item.by}</Link>{' '}
                   <Link href={`/item?id=${item.id}`}>{timeAgo(item.created_at)}</Link>
                   {' | '}
