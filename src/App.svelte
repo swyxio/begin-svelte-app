@@ -700,6 +700,15 @@
                 {#if item.domain}
                   <span class="domain">({item.domain})</span>
                 {/if}
+                <div class="subtext">
+                  {item.score} points by
+                  <a href={`#/user?id=${item.by}`}>{item.by}</a>
+                  {timeAgo(item.createdAt)}
+                  {#if item.favorite}
+                    <span class="sep">|</span>
+                    <button type="button" class="link-button" on:click={() => handleFavorite(item)}>unfavorite</button>
+                  {/if}
+                </div>
               </div>
             </li>
           {/each}
@@ -719,6 +728,15 @@
                 {#if item.domain}
                   <span class="domain">({item.domain})</span>
                 {/if}
+                <div class="subtext">
+                  {item.score} points by
+                  <a href={`#/user?id=${item.by}`}>{item.by}</a>
+                  {timeAgo(item.createdAt)}
+                  {#if item.hidden}
+                    <span class="sep">|</span>
+                    <button type="button" class="link-button" on:click={() => handleHide(item)}>unhide</button>
+                  {/if}
+                </div>
               </div>
             </li>
           {/each}
