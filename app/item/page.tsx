@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getItemById, getCommentsByStory, getUserVotesForItems, getUserByUsername, DbItem } from '@/lib/db';
 import { getCurrentUser } from '@/lib/session';
@@ -6,6 +6,7 @@ import { extractDomain, timeAgo } from '@/lib/utils';
 import { formatHnText } from '@/lib/format';
 import { CommentTree, buildCommentTree } from '@/components/CommentTree';
 import { VoteArrows } from '@/components/VoteArrows';
+import { addComment } from './actions';
 
 export default async function ItemPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -45,28 +46,7 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
   const domain = item.url ? extractDomain(item.url) : null;
   const formattedText = item.text ? formatHnText(item.text) : null;
 
-  async function handleComment(formData: FormData) {
-    'use server';
-    const currentUser = await (await import('@/lib/session')).getCurrentUser();
-    if (!currentUser) redirect('/login');
-
-    const text = (formData.get('text') as string || '').trim();
-    if (!text) redirect(`/item?id=${id}`);
-
-    const { createItem, incrementDescendants } = await import('@/lib/db');
-    const { formatHnText } = await import('@/lib/format');
-
-    createItem({
-      type: 'comment',
-      by: currentUser.username,
-      text: formatHnText(text),
-      parent_id: id,
-      story_id: id,
-    });
-
-    incrementDescendants(id);
-    redirect(`/item?id=${id}`);
-  }
+  // Comment form uses the addComment server action from actions.ts
 
   return (
     <div>
@@ -131,7 +111,8 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
       )}
       {user && item.type !== 'job' && (
         <div className="comment-form">
-          <form action={handleComment}>
+          <form action={addComment}>
+            <input type="hidden" name="item_id" value={item.id} />
             <textarea name="text" rows={8} cols={80}></textarea>
             <br />
             <input type="submit" value="add comment" />
@@ -172,28 +153,7 @@ async function CommentItemPage({ item, user }: { item: DbItem; user: { userId: n
   const commentAge = Date.now() - new Date(item.created_at + 'Z').getTime();
   const canEdit = user?.username === item.by && commentAge < 2 * 60 * 60 * 1000;
 
-  async function handleReply(formData: FormData) {
-    'use server';
-    const currentUser = await (await import('@/lib/session')).getCurrentUser();
-    if (!currentUser) redirect('/login');
-
-    const text = (formData.get('text') as string || '').trim();
-    if (!text) redirect(`/item?id=${item.id}`);
-
-    const { createItem, incrementDescendants } = await import('@/lib/db');
-    const { formatHnText } = await import('@/lib/format');
-
-    createItem({
-      type: 'comment',
-      by: currentUser.username,
-      text: formatHnText(text),
-      parent_id: item.id,
-      story_id: item.story_id || item.id,
-    });
-
-    if (item.story_id) incrementDescendants(item.story_id);
-    redirect(`/item?id=${item.id}`);
-  }
+  // Reply form uses the addComment server action from actions.ts
 
   return (
     <div>
@@ -257,7 +217,8 @@ async function CommentItemPage({ item, user }: { item: DbItem; user: { userId: n
       </div>
       {user && (
         <div className="comment-form">
-          <form action={handleReply}>
+          <form action={addComment}>
+            <input type="hidden" name="item_id" value={item.id} />
             <textarea name="text" rows={8} cols={80}></textarea>
             <br />
             <input type="submit" value="reply" />

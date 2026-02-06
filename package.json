@@ -8,19 +8,20 @@
     "start": "next start --port 3000"
   },
   "dependencies": {
-    "next": "^15.3.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.8.2",
     "iron-session": "^8.0.4",
-    "bcryptjs": "^2.4.3"
+    "next": "^15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/bcryptjs": "^2.4.6",
+    "puppeteer": "^24.37.1",
     "typescript": "^5.8.0"
   }
 }

@@ -1,9 +1,10 @@
-import { redirect, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getUserByUsername, updateUserProfile } from '@/lib/db';
+import { getUserByUsername } from '@/lib/db';
 import { getCurrentUser } from '@/lib/session';
-import { formatDate, timeAgo } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { formatHnText } from '@/lib/format';
+import { handleUpdateProfile } from './actions';
 
 export default async function UserPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -16,40 +17,11 @@ export default async function UserPage({ searchParams }: { searchParams: Promise
   const currentUser = await getCurrentUser();
   const isOwnProfile = currentUser?.username?.toLowerCase() === profileUser.username.toLowerCase();
 
-  async function handleUpdateProfile(formData: FormData) {
-    'use server';
-    const session = await (await import('@/lib/session')).getCurrentUser();
-    if (!session) redirect('/login');
-
-    const user = (await import('@/lib/db')).getUserByUsername(username);
-    if (!user || session.userId !== user.id) redirect('/');
-
-    const about = formData.get('about') as string || '';
-    const email = formData.get('email') as string || '';
-    const showdead = formData.get('showdead') === 'yes' ? 1 : 0;
-    const noprocrast = formData.get('noprocrast') === 'yes' ? 1 : 0;
-    const maxvisit = parseInt(formData.get('maxvisit') as string) || 20;
-    const minaway = parseInt(formData.get('minaway') as string) || 180;
-    const delay = parseInt(formData.get('delay') as string) || 0;
-
-    (await import('@/lib/db')).updateUserProfile(user.id, {
-      about,
-      email,
-      showdead,
-      noprocrast,
-      maxvisit,
-      minaway,
-      delay,
-    });
-
-    redirect(`/user?id=${username}`);
-  }
-
   if (isOwnProfile) {
-    // Editable profile
     return (
       <div className="user-page">
         <form action={handleUpdateProfile}>
+          <input type="hidden" name="username" value={profileUser.username} />
           <table>
             <tbody>
               <tr>
@@ -131,7 +103,6 @@ export default async function UserPage({ searchParams }: { searchParams: Promise
     );
   }
 
-  // Public profile view
   const aboutHtml = profileUser.about ? formatHnText(profileUser.about) : '';
 
   return (

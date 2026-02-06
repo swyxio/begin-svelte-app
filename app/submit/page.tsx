@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/session';
+import { submitStory } from './actions';
 
 export default async function SubmitPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -8,67 +9,10 @@ export default async function SubmitPage({ searchParams }: { searchParams: Promi
 
   const error = typeof params.error === 'string' ? params.error : null;
 
-  async function handleSubmit(formData: FormData) {
-    'use server';
-    const currentUser = await (await import('@/lib/session')).getCurrentUser();
-    if (!currentUser) redirect('/login');
-
-    const title = (formData.get('title') as string || '').trim();
-    const url = (formData.get('url') as string || '').trim();
-    const text = (formData.get('text') as string || '').trim();
-
-    if (!title) {
-      redirect('/submit?error=' + encodeURIComponent('Please enter a title.'));
-    }
-
-    if (title.length > 80) {
-      redirect('/submit?error=' + encodeURIComponent('Titles can be at most 80 characters long.'));
-    }
-
-    // Validate URL format if provided
-    if (url) {
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        redirect('/submit?error=' + encodeURIComponent('URLs must begin with http:// or https://'));
-      }
-      try {
-        new URL(url);
-      } catch {
-        redirect('/submit?error=' + encodeURIComponent('Please enter a valid URL.'));
-      }
-    }
-
-    // Can't have both url and text (on HN, text is only for Ask HN / text posts)
-    if (url && text) {
-      redirect('/submit?error=' + encodeURIComponent('Submissions can\'t have both a url and text. If you want to show a url with your text, just include it in the text.'));
-    }
-
-    // Check for duplicate URL
-    if (url) {
-      const { getItemByUrl } = await import('@/lib/db');
-      const existing = getItemByUrl(url);
-      if (existing) {
-        redirect(`/item?id=${existing.id}`);
-      }
-    }
-
-    const type = 'story';
-
-    const { createItem } = await import('@/lib/db');
-    const itemId = createItem({
-      type,
-      by: currentUser.username,
-      title,
-      url: url || undefined,
-      text: text || undefined,
-    });
-
-    redirect(`/item?id=${itemId}`);
-  }
-
   return (
     <div className="submit-page">
       {error && <div className="login-error">{error}</div>}
-      <form action={handleSubmit}>
+      <form action={submitStory}>
         <table>
           <tbody>
             <tr>

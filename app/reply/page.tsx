@@ -1,9 +1,10 @@
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getItemById, createItem, incrementDescendants } from '@/lib/db';
+import { getItemById } from '@/lib/db';
 import { getCurrentUser } from '@/lib/session';
 import { timeAgo } from '@/lib/utils';
 import { formatHnText } from '@/lib/format';
+import { submitReply } from './actions';
 
 export default async function ReplyPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -15,31 +16,6 @@ export default async function ReplyPage({ searchParams }: { searchParams: Promis
 
   const item = getItemById(id);
   if (!item || item.deleted === 1) notFound();
-
-  async function handleReply(formData: FormData) {
-    'use server';
-    const currentUser = await (await import('@/lib/session')).getCurrentUser();
-    if (!currentUser) redirect('/login');
-
-    const text = (formData.get('text') as string || '').trim();
-    if (!text) redirect(`/reply?id=${id}`);
-
-    const parentItem = (await import('@/lib/db')).getItemById(id);
-    if (!parentItem) redirect('/');
-
-    const storyId = parentItem.type === 'comment' ? (parentItem.story_id || parentItem.id) : parentItem.id;
-
-    (await import('@/lib/db')).createItem({
-      type: 'comment',
-      by: currentUser.username,
-      text: (await import('@/lib/format')).formatHnText(text),
-      parent_id: id,
-      story_id: storyId,
-    });
-
-    (await import('@/lib/db')).incrementDescendants(storyId);
-    redirect(`/item?id=${id}`);
-  }
 
   return (
     <div className="reply-page">
@@ -57,7 +33,8 @@ export default async function ReplyPage({ searchParams }: { searchParams: Promis
         </div>
         <div className="comment-body" dangerouslySetInnerHTML={{ __html: item.type === 'comment' ? (item.text || '') : (item.text ? formatHnText(item.text) : (item.title || '')) }} />
       </div>
-      <form action={handleReply}>
+      <form action={submitReply}>
+        <input type="hidden" name="parent_id" value={id} />
         <textarea name="text" rows={8} cols={80}></textarea>
         <br />
         <input type="submit" value="reply" />

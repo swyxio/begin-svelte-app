@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/session';
-import { changePassword } from '@/lib/auth';
+import { handleChangePw } from './actions';
 
 export default async function ChangePwPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -9,27 +9,6 @@ export default async function ChangePwPage({ searchParams }: { searchParams: Pro
 
   const error = typeof params.error === 'string' ? params.error : null;
   const success = params.success === 'true';
-
-  async function handleChangePw(formData: FormData) {
-    'use server';
-    const currentUser = await (await import('@/lib/session')).getCurrentUser();
-    if (!currentUser) redirect('/login');
-
-    const currentPassword = formData.get('current') as string;
-    const newPassword = formData.get('new') as string;
-    const confirm = formData.get('confirm') as string;
-
-    if (newPassword !== confirm) {
-      redirect('/changepw?error=' + encodeURIComponent("Passwords don't match."));
-    }
-
-    const result = await (await import('@/lib/auth')).changePassword(currentUser.userId, currentPassword, newPassword);
-    if (result.error) {
-      redirect('/changepw?error=' + encodeURIComponent(result.error));
-    }
-
-    redirect('/changepw?success=true');
-  }
 
   return (
     <div className="changepw-page">

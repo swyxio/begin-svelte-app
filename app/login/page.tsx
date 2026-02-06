@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { login, register } from '@/lib/auth';
 import { getCurrentUser } from '@/lib/session';
+import { handleLogin, handleRegister } from './actions';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -8,32 +8,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const creating = params.creating === 'true';
   const user = await getCurrentUser();
   if (user) redirect(goto);
-
-  async function handleLogin(formData: FormData) {
-    'use server';
-    const username = formData.get('acct') as string;
-    const password = formData.get('pw') as string;
-    const gotoUrl = formData.get('goto') as string || '/';
-
-    const result = await login(username, password);
-    if (result.error) {
-      redirect(`/login?error=${encodeURIComponent(result.error)}&goto=${encodeURIComponent(gotoUrl)}`);
-    }
-    redirect(gotoUrl);
-  }
-
-  async function handleRegister(formData: FormData) {
-    'use server';
-    const username = formData.get('acct') as string;
-    const password = formData.get('pw') as string;
-    const gotoUrl = formData.get('goto') as string || '/';
-
-    const result = await register(username, password);
-    if (result.error) {
-      redirect(`/login?creating=true&error=${encodeURIComponent(result.error)}&goto=${encodeURIComponent(gotoUrl)}`);
-    }
-    redirect(gotoUrl);
-  }
 
   const error = typeof params.error === 'string' ? params.error : null;
 
