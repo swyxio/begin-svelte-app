@@ -96,6 +96,15 @@ test('Get item detail', async t => {
   t.ok(result.body.comments.length >= 1, 'Loaded comment tree')
 })
 
+test('Get comments listing', async t => {
+  t.plan(1)
+  let result = await tiny.get({
+    url: `${url}/api?action=comments`,
+    headers: { cookie: voterCookie }
+  })
+  t.ok(result.body.comments.some(comment => comment.rootId === itemId), 'Comments listing includes thread')
+})
+
 test('Shut down sandbox', t => {
   t.plan(1)
   end()

@@ -299,6 +299,35 @@ async function listItems ({ sort = 'top', type, page = 1, username }) {
   }
 }
 
+async function listComments ({ page = 1, username }) {
+  let records = await listAll()
+  let state = getUserState(records, username)
+  let items = records.filter(record => ITEM_TYPES.includes(record.type) && record.type !== 'comment')
+  let comments = records
+    .filter(record => record.type === 'comment')
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+  let start = (page - 1) * PAGE_SIZE
+  let paged = comments.slice(start, start + PAGE_SIZE)
+  let hasMore = comments.length > start + PAGE_SIZE
+
+  let serialized = paged.map(record => {
+    let comment = serializeItem(record, state, username)
+    let root = items.find(item => ensureItemId(item) === comment.rootId)
+    if (root) {
+      comment.rootTitle = root.title
+      comment.rootBy = root.by
+    }
+    return comment
+  })
+
+  return {
+    comments: serialized,
+    page,
+    hasMore
+  }
+}
+
 async function getItemDetail ({ id, username }) {
   let records = await listAll()
   let state = getUserState(records, username)
@@ -588,6 +617,7 @@ module.exports = {
   getUserFavorites,
   getUserHidden,
   listItems,
+  listComments,
   getItemDetail,
   createItem,
   createComment,

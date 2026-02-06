@@ -8,6 +8,7 @@
   let route = { page: 'top', params: new URLSearchParams() }
   let currentUser = null
   let items = []
+  let commentList = []
   let listHasMore = false
   let itemDetail = null
   let userProfile = null
@@ -137,6 +138,7 @@
     loading = true
     error = ''
     items = []
+    commentList = []
     itemDetail = null
     userProfile = null
     userThreads = null
@@ -153,6 +155,10 @@
         let type = route.page === 'ask' ? 'ask' : route.page === 'show' ? 'show' : route.page === 'jobs' ? 'job' : null
         let data = await apiGet('items', { sort, type, page })
         items = data.items
+        listHasMore = data.hasMore
+      } else if (route.page === 'comments') {
+        let data = await apiGet('comments', { page })
+        commentList = data.comments
         listHasMore = data.hasMore
       } else if (route.page === 'item') {
         let id = route.params.get('id')
@@ -358,6 +364,8 @@
       <a class="title" href="#/">Hacker News</a>
     </div>
     <nav class="nav-links">
+      <a href="#/comments">comments</a>
+      <span class="sep">|</span>
       <a href="#/new">new</a>
       <span class="sep">|</span>
       <a href="#/ask">ask</a>
@@ -438,6 +446,31 @@
           <a href={buildHash(route.page, { p: page + 1 })}>more</a>
         </div>
       {/if}
+    {/if}
+
+    {#if route.page === 'comments'}
+      <section class="comments">
+        {#each commentList as comment}
+          <div class="comment-snippet">
+            <div class="comment-meta">
+              {#if currentUser}
+                <a class="vote" href="#" on:click|preventDefault={() => handleVote(comment)}>{comment.voted ? '▲' : '△'}</a>
+              {/if}
+              {comment.score} points by
+              <a href={`#/user?id=${comment.by}`}>{comment.by}</a>
+              {timeAgo(comment.createdAt)}
+              <span class="sep">|</span>
+              <a href={`#/item?id=${comment.rootId}`}>{comment.rootTitle || 'link'}</a>
+            </div>
+            <div class="comment-text">{comment.text}</div>
+          </div>
+        {/each}
+        {#if listHasMore}
+          <div class="more">
+            <a href={buildHash('comments', { p: page + 1 })}>more</a>
+          </div>
+        {/if}
+      </section>
     {/if}
 
     {#if route.page === 'item' && itemDetail}

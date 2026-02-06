@@ -43,6 +43,12 @@ exports.handler = async function http (req) {
       return jsonResponse(200, data)
     }
 
+    if (action === 'comments') {
+      let page = Number(query.page || 1)
+      let data = await hn.listComments({ page, username })
+      return jsonResponse(200, data)
+    }
+
     if (action === 'item') {
       let id = query.id
       let data = await hn.getItemDetail({ id, username })
