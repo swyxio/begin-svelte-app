@@ -105,6 +105,12 @@
     return currentUser && item && item.by && item.by !== currentUser.username && !item.deleted && item.type !== 'job'
   }
 
+  function commentLabel (count) {
+    if (!count) return 'discuss'
+    if (count === 1) return '1 comment'
+    return `${count} comments`
+  }
+
   async function apiGet (action, params = {}) {
     let search = new URLSearchParams({ action })
     Object.entries(params).forEach(([key, value]) => {
@@ -465,7 +471,7 @@
                   <a href={`#/user?id=${item.by}`}>{item.by}</a>
                   {timeAgo(item.createdAt)}
                   <span class="sep">|</span>
-                  <a href={`#/item?id=${item.id}`}>{item.descendants} comments</a>
+                  <a href={`#/item?id=${item.id}`}>{commentLabel(item.descendants)}</a>
                 {/if}
                 {#if currentUser}
                   <span class="sep">|</span>
@@ -722,7 +728,7 @@
                 <div class="subtext">
                   {item.score} points
                   <span class="sep">|</span>
-                  <a href={`#/item?id=${item.id}`}>{item.descendants} comments</a>
+                  <a href={`#/item?id=${item.id}`}>{commentLabel(item.descendants)}</a>
                 </div>
               </div>
             </li>
