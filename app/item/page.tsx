@@ -235,16 +235,23 @@ async function CommentItemPage({ item, user }: { item: DbItem; user: { userId: n
         </div>
         <div className="comment-body" dangerouslySetInnerHTML={{ __html: formattedText }} />
       </div>
-      {storyItem && (
-        <div style={{ padding: '5px 0', fontSize: '8pt', color: '#828282' }}>
-          on: <Link href={`/item?id=${storyItem.id}`}>{storyItem.title}</Link>
-        </div>
-      )}
-      {parentItem && parentItem.id !== (storyItem?.id || 0) && (
-        <div style={{ padding: '2px 0', fontSize: '8pt', color: '#828282' }}>
-          <Link href={`/item?id=${parentItem.id}`}>parent</Link>
-        </div>
-      )}
+      <div style={{ padding: '5px 0', fontSize: '8pt', color: '#828282' }}>
+        {storyItem && (
+          <>on: <Link href={`/item?id=${storyItem.id}`}>{storyItem.title}</Link></>
+        )}
+        {parentItem && (
+          <>
+            {storyItem && ' | '}
+            <Link href={`/item?id=${parentItem.id}`}>parent</Link>
+          </>
+        )}
+        {item.story_id && (
+          <>
+            {' | '}
+            <Link href={`/item?id=${item.story_id}`}>context</Link>
+          </>
+        )}
+      </div>
       {user && (
         <div className="comment-form">
           <form action={handleReply}>
