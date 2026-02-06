@@ -21,6 +21,18 @@ test('Start sandbox', async t => {
   t.ok(end, 'Sandbox started!')
 })
 
+test('Missing action returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api`, buffer: true })
+    t.fail('Missing action should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 400, 'Missing action returns 400')
+    t.equal(body.status, 400, 'Missing action includes status')
+  }
+})
+
 test('Register submitter', async t => {
   t.plan(2)
   let result = await tiny.post({

@@ -19,9 +19,9 @@ exports.handler = async function http (req) {
     let action = query.action
     let session = await getSessionFromRequest(req)
     let username = session ? session.username : null
-
     if (!action) {
-      return jsonResponse(400, { error: 'Missing action.' })
+      let payload = { error: 'Missing action.', status: 400 }
+      return jsonResponse(400, payload)
     }
 
     if (action === 'me') {
@@ -68,7 +68,7 @@ exports.handler = async function http (req) {
     if (action === 'favorites') {
       let target = query.username || username
       if (!target) {
-        return jsonResponse(400, { error: 'Missing username.' })
+        return jsonResponse(400, { error: 'Missing username.', status: 400 })
       }
       let data = await hn.getUserFavorites(target, username)
       return jsonResponse(200, data)
@@ -77,13 +77,13 @@ exports.handler = async function http (req) {
     if (action === 'hidden') {
       let target = query.username || username
       if (!target) {
-        return jsonResponse(400, { error: 'Missing username.' })
+        return jsonResponse(400, { error: 'Missing username.', status: 400 })
       }
       let data = await hn.getUserHidden(target, username)
       return jsonResponse(200, data)
     }
 
-    return jsonResponse(404, { error: 'Unknown action.' })
+    return jsonResponse(404, { error: 'Unknown action.', status: 404 })
   } catch (error) {
     console.error(error)
     let status = error.status || 500

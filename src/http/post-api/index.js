@@ -46,7 +46,7 @@ exports.handler = async function http (req) {
     let username = session ? session.username : null
 
     if (!action) {
-      return jsonResponse(400, { error: 'Missing action.' })
+      return jsonResponse(400, { error: 'Missing action.', status: 400 })
     }
 
     if (action === 'register') {
@@ -166,7 +166,7 @@ exports.handler = async function http (req) {
       return jsonResponse(200, { item })
     }
 
-    return jsonResponse(404, { error: 'Unknown action.' })
+    return jsonResponse(404, { error: 'Unknown action.', status: 404 })
   } catch (error) {
     console.error(error)
     let status = error.status || 500
