@@ -110,7 +110,7 @@ test('Register reader and favorite/hide', async t => {
 })
 
 test('Hidden list and threads', async t => {
-  t.plan(2)
+  t.plan(3)
   let hidden = await tiny.get({
     url: `${url}/api?action=hidden&username=dave`,
     headers: { cookie: readerCookie }
@@ -128,6 +128,8 @@ test('Hidden list and threads', async t => {
     headers: { cookie: readerCookie }
   })
   t.ok(threads.body.comments.length >= 1, 'Threads returned')
+  let threadComment = threads.body.comments.find(comment => comment.rootId === itemId)
+  t.equal(threadComment.rootBy, 'cathy', 'Threads include root author')
 })
 
 test('Shut down sandbox', t => {

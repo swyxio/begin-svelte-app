@@ -257,19 +257,21 @@ async function getUserThreads (username, viewer) {
 
   let state = getUserState(records, viewer)
   let items = records.filter(record => ITEM_TYPES.includes(record.type))
-  let comments = items
+  let commentRecords = items
     .filter(record => record.by === username && record.type === 'comment')
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map(record => {
-      let serialized = serializeItem(record, state, viewer)
-      if (serialized.rootId) {
-        let root = items.find(item => ensureItemId(item) === serialized.rootId)
-        if (root) {
-          serialized.rootTitle = root.title
-        }
+  let comments = commentRecords.map(record => {
+    let serialized = serializeItem(record, state, viewer)
+    let root = null
+    if (serialized.rootId) {
+      root = items.find(item => ensureItemId(item) === serialized.rootId)
+      if (root) {
+        serialized.rootTitle = root.title
+        serialized.rootBy = root.by
       }
-      return serialized
-    })
+    }
+    return serialized
+  })
 
   return {
     user: sanitizeUser(user),
