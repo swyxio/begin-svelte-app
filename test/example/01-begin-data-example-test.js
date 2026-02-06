@@ -105,18 +105,22 @@ test('Register reader and favorite/hide', async t => {
   })
   t.ok(true, 'Favorited item')
 
-  await tiny.post({
-    url: `${url}/api`,
-    headers: { cookie: readerCookie },
-    data: { action: 'hide', itemId }
-  })
-  t.ok(true, 'Hidden item')
-
   let favorites = await tiny.get({
     url: `${url}/api?action=favorites&username=dave`,
     headers: { cookie: readerCookie }
   })
   t.ok(favorites.body.items.length >= 1, 'Favorites returned')
+
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'hide', itemId }
+  })
+  let hiddenForReader = await tiny.get({
+    url: `${url}/api?action=items&sort=top`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(!hiddenForReader.body.items.some(item => item.id === itemId), 'Hidden item removed from list')
 })
 
 test('Hidden list and threads', async t => {
