@@ -142,6 +142,32 @@ test('Hidden list and threads', async t => {
   t.equal(threadComment.rootBy, 'cathy', 'Threads include root author')
 })
 
+test('Remove favorite and hidden', async t => {
+  t.plan(2)
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'unfavorite', itemId }
+  })
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'unhide', itemId }
+  })
+
+  let favorites = await tiny.get({
+    url: `${url}/api?action=favorites&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(!favorites.body.items.some(item => item.id === itemId), 'Unfavorite removed item')
+
+  let hidden = await tiny.get({
+    url: `${url}/api?action=hidden&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(!hidden.body.items.some(item => item.id === itemId), 'Unhide removed item')
+})
+
 test('Shut down sandbox', t => {
   t.plan(1)
   end()
