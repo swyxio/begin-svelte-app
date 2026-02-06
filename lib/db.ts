@@ -238,7 +238,7 @@ export function getCommentsByStory(storyId: number, currentUsername?: string) {
       OR i.by = ? COLLATE NOCASE
       OR datetime(i.created_at, '+' || u.delay || ' minutes') <= datetime('now')
     )
-    ORDER BY i.created_at ASC
+    ORDER BY i.score DESC, i.created_at ASC
   `).all(storyId, currentUsername || '') as DbItem[];
 }
 
