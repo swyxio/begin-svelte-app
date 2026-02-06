@@ -1,6 +1,6 @@
-# Begin basic Svelte app + API
+# Hacker News Clone (Begin + Svelte)
 
-[Svelte](https://svelte.dev)'s starter app, extended by [Begin](https://begin.com)-based API endpoints.
+This project is a faithful Hacker News clone built with Svelte and Begin/Architect. It includes the core social features (accounts, submissions, comments, voting, favorites, hide, flag, edit/delete) while excluding historical archive views (past/best/classic).
 
 
 ## Getting started
@@ -16,7 +16,27 @@ npm install
 npm start
 ```
 
-Navigate to [localhost:3333](http://localhost:3333). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
+Navigate to [localhost:3333](http://localhost:3333). You should see the Hacker News–style interface running.
+
+### Run tests
+```
+npm test
+```
+
+### Build the frontend bundle
+```
+npm run build
+```
+
+## Features
+- Authentication (register/login/logout)
+- Story/ask/show/job submissions
+- Threaded comments and replies
+- Voting with karma updates
+- Favorites, hidden items, and flagging
+- Edit/delete for your own items
+- User profiles with submissions/comments/threads
+- Global comments listing
 
 
 ## Begin Reference
