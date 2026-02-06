@@ -1023,6 +1023,7 @@
 
   .profile .about {
     margin: 8px 0 12px;
+    white-space: pre-wrap;
   }
 
   .comment-snippet {
@@ -1033,6 +1034,7 @@
 
   .comment-snippet .comment-text {
     margin-top: 4px;
+    white-space: pre-wrap;
   }
 
   .muted {
