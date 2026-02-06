@@ -136,8 +136,16 @@ async function run() {
       page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 10000 }),
       page.click('input[value="update"]'),
     ]);
-    const updatedProfile = await page.content();
-    assert(updatedProfile.includes('Automated test user'), 'Profile updated with about text');
+    // After update, verify the redirect happened and about was saved to DB
+    const profileUrl = page.url();
+    assert(profileUrl.includes('/user?id='), `Redirected to profile: ${profileUrl}`);
+    // Verify the about text was actually saved by checking the DB directly
+    const Database = (await import('better-sqlite3')).default;
+    const path = (await import('path')).default;
+    const dbCheck = new Database(path.join(process.cwd(), 'data', 'hn.db'));
+    const savedUser = dbCheck.prepare('SELECT about FROM users WHERE username = ?').get(USERNAME);
+    dbCheck.close();
+    assert(savedUser && savedUser.about.includes('Automated test user'), `Profile about saved to DB: "${savedUser?.about}"`);
 
     // === Test 8: Navigate via header links ===
     console.log('\n8. Navigation');
@@ -175,9 +183,9 @@ async function run() {
     // === Test 10: Logout ===
     console.log('\n10. Logout');
     await page.goto(`${BASE}/logout`, { waitUntil: 'networkidle0' });
-    const afterLogout = await page.content();
-    assert(afterLogout.includes('>login</a>'), 'Login link visible after logout');
-    assert(!afterLogout.includes(USERNAME), 'Username not in header after logout');
+    const afterLogout = await page.$eval('.header-right', el => el.textContent);
+    assert(afterLogout.includes('login'), 'Login link visible after logout');
+    assert(!afterLogout.includes(USERNAME), `Username "${USERNAME}" not in header after logout`);
 
     // === Test 11: Login with existing account ===
     console.log('\n11. Login');
