@@ -7,6 +7,9 @@ import { NoprocrastGate } from '@/components/NoprocrastGate';
 export const metadata: Metadata = {
   title: 'Hacker News',
   description: 'Hacker News Clone',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export const dynamic = 'force-dynamic';
