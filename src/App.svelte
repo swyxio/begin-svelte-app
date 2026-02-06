@@ -195,11 +195,23 @@
         let data = await apiGet('threads', { username: id })
         userThreads = data
       } else if (route.page === 'favorites') {
-        let id = route.params.get('id') || (currentUser && currentUser.username)
+        let id = route.params.get('id')
+        if (!id && currentUser) {
+          id = currentUser.username
+        }
+        if (!id) {
+          throw new Error('Missing username.')
+        }
         let data = await apiGet('favorites', { username: id })
         favorites = data.items
       } else if (route.page === 'hidden') {
-        let id = route.params.get('id') || (currentUser && currentUser.username)
+        let id = route.params.get('id')
+        if (!id && currentUser) {
+          id = currentUser.username
+        }
+        if (!id) {
+          throw new Error('Missing username.')
+        }
         let data = await apiGet('hidden', { username: id })
         hiddenItems = data.items
       }
