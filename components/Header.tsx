@@ -29,6 +29,8 @@ export async function Header() {
                   </>
                 )}
                 <span className="header-nav-sep">|</span>
+                <Link href="/best">past</Link>
+                <span className="header-nav-sep">|</span>
                 <Link href="/newcomments">comments</Link>
                 <span className="header-nav-sep">|</span>
                 <Link href="/ask">ask</Link>
@@ -45,13 +47,9 @@ export async function Header() {
             {user ? (
               <span style={{ fontSize: '10pt' }}>
                 <Link href={`/user?id=${user.username}`}>{user.username}</Link>
-                {' '}
-                <span className="header-nav-sep">({' '}
-                  <Link href={`/user?id=${user.username}`} style={{ color: '#000' }}>
-                    <UserKarma username={user.username} />
-                  </Link>
-                {' '})</span>
-                {' '}
+                {' ('}
+                <UserKarma username={user.username} />
+                {') '}
                 <span className="header-nav-sep">|</span>
                 {' '}
                 <Link href="/logout">logout</Link>

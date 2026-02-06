@@ -291,9 +291,9 @@ export function getStoriesFromDomain(domain: string, limit: number = 30, offset:
   const db = getDb();
   return db.prepare(`
     SELECT * FROM items 
-    WHERE type = 'story' AND deleted = 0 AND url LIKE ?
+    WHERE type = 'story' AND deleted = 0 AND (url LIKE ? OR url LIKE ?)
     ORDER BY created_at DESC LIMIT ? OFFSET ?
-  `).all(`%://${domain}%`, limit, offset) as DbItem[];
+  `).all(`%://${domain}%`, `%://www.${domain}%`, limit, offset) as DbItem[];
 }
 
 // ─── Vote queries ────────────────────────────────────────
