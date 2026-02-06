@@ -57,6 +57,18 @@ test('Missing favorites username returns status', async t => {
   }
 })
 
+test('Unknown favorites user returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api?action=favorites&username=missing`, buffer: true })
+    t.fail('Missing user should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 404, 'Missing user returns 404')
+    t.equal(body.status, 404, 'Missing user includes status')
+  }
+})
+
 test('Missing hidden username returns status', async t => {
   t.plan(2)
   try {
@@ -66,6 +78,18 @@ test('Missing hidden username returns status', async t => {
     let body = JSON.parse(err.body)
     t.equal(err.statusCode, 400, 'Missing username returns 400')
     t.equal(body.status, 400, 'Missing username includes status')
+  }
+})
+
+test('Unknown hidden user returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api?action=hidden&username=missing`, buffer: true })
+    t.fail('Missing user should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 404, 'Missing user returns 404')
+    t.equal(body.status, 404, 'Missing user includes status')
   }
 })
 

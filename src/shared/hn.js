@@ -281,6 +281,11 @@ async function getUserThreads (username, viewer) {
 
 async function getUserFavorites (username, viewer) {
   let records = await listAll()
+  let user = records.find(record => record.key === `${KEY_PREFIXES.user}${username}`)
+  if (!user) {
+    throw createError('User not found.', 404)
+  }
+
   let state = getUserState(records, viewer)
   let favorites = filterByPrefix(records, `${KEY_PREFIXES.favorite}${username}:`)
   let items = records.filter(record => ITEM_TYPES.includes(record.type))
@@ -289,7 +294,6 @@ async function getUserFavorites (username, viewer) {
     let item = items.find(entry => ensureItemId(entry) === itemId)
     return serializeItem(item, state, viewer)
   }).filter(Boolean)
-
   return {
     items: favoritesList
   }
@@ -297,6 +301,11 @@ async function getUserFavorites (username, viewer) {
 
 async function getUserHidden (username, viewer) {
   let records = await listAll()
+  let user = records.find(record => record.key === `${KEY_PREFIXES.user}${username}`)
+  if (!user) {
+    throw createError('User not found.', 404)
+  }
+
   let state = getUserState(records, viewer)
   let hidden = filterByPrefix(records, `${KEY_PREFIXES.hide}${username}:`)
   let items = records.filter(record => ITEM_TYPES.includes(record.type))
@@ -305,7 +314,6 @@ async function getUserHidden (username, viewer) {
     let item = items.find(entry => ensureItemId(entry) === itemId)
     return serializeItem(item, state, viewer)
   }).filter(Boolean)
-
   return {
     items: hiddenList
   }
