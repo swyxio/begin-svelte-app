@@ -75,12 +75,8 @@ export function StoryItem({ item, rank, userVote, currentUser, showText }: Story
                       )}
                       <a href={`/api/hide?id=${item.id}`}>hide</a>
                       {' | '}
-                      {currentUser.username !== item.by && (
-                        <>
-                          <a href={`/api/flag?id=${item.id}`}>flag</a>
-                          {' | '}
-                        </>
-                      )}
+                      <a href={`/api/fave?id=${item.id}`}>favorite</a>
+                      {' | '}
                     </>
                   )}
                   <Link href={`/item?id=${item.id}`}>

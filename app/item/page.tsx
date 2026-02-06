@@ -115,6 +115,9 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
                       {user && (
                         <> | <a href={`/api/fave?id=${item.id}`}>favorite</a></>
                       )}
+                      {user && user.username !== item.by && (
+                        <> | <a href={`/api/flag?id=${item.id}`}>flag</a></>
+                      )}
                     </>
                   )}
                 </span>
