@@ -1,0 +1,282 @@
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { getItemById, getCommentsByStory, getUserVotesForItems, getUserByUsername, getPollOptions, DbItem } from '@/lib/db';
+import { getCurrentUser } from '@/lib/session';
+import { extractDomain, timeAgo } from '@/lib/utils';
+import { formatHnText } from '@/lib/format';
+import { CommentTree, buildCommentTree } from '@/components/CommentTree';
+import { VoteArrows } from '@/components/VoteArrows';
+import { addComment } from './actions';
+
+export default async function ItemPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
+  const id = parseInt(params.id as string, 10);
+  if (isNaN(id)) notFound();
+
+  const item = getItemById(id);
+  if (!item || item.deleted === 1) notFound();
+
+  const user = await getCurrentUser();
+  const isComment = item.type === 'comment';
+
+  if (isComment) {
+    return <CommentItemPage item={item} user={user} />;
+  }
+
+  // It's a story or job
+  const comments = getCommentsByStory(item.id, user?.username);
+  const commentTree = buildCommentTree(comments);
+  const topLevelComments = commentTree.get(item.id) || [];
+
+  // Get vote states
+  const allItemIds = [item.id, ...comments.map(c => c.id)];
+  const userVotes = new Map<number, string>();
+  let canDownvote = false;
+  let showDead = false;
+  if (user) {
+    const votes = getUserVotesForItems(user.userId, allItemIds);
+    for (const v of votes) {
+      userVotes.set(v.item_id, v.direction);
+    }
+    const dbUser = getUserByUsername(user.username);
+    canDownvote = (dbUser?.karma || 0) >= 500;
+    showDead = dbUser?.showdead === 1;
+  }
+
+  const domain = item.url ? extractDomain(item.url) : null;
+  const formattedText = item.text ? formatHnText(item.text) : null;
+
+  // Comment form uses the addComment server action from actions.ts
+
+  return (
+    <div>
+      <div className="item-header">
+        <table style={{ borderSpacing: 0 }}>
+          <tbody>
+            <tr>
+              <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
+                {item.type !== 'job' && (!user || user.username !== item.by) ? (
+                  <VoteArrows
+                    itemId={item.id}
+                    currentVote={userVotes.get(item.id) || null}
+                    itemType="story"
+                    isLoggedIn={!!user}
+                  />
+                ) : (
+                  <span className="vote-spacer" />
+                )}
+              </td>
+              <td>
+                <span className="story-title">
+                  {item.url ? (
+                    <a href={item.url} className="story-link">{item.title}</a>
+                  ) : (
+                    <span className="story-link">{item.title}</span>
+                  )}
+                </span>
+                {domain && (
+                  <span className="story-domain">
+                    (<Link href={`/from?site=${domain}`}>{domain}</Link>)
+                  </span>
+                )}
+                <br />
+                <span className="story-subtext">
+                  {item.type !== 'job' && (
+                    <>
+                      {`${item.score} point${item.score !== 1 ? 's' : ''} by `}
+                      <Link href={`/user?id=${item.by}`}>{item.by}</Link>{' '}
+                      {timeAgo(item.created_at)}
+                      {user && userVotes.get(item.id) === 'up' && (
+                        <> | <a href={`/api/vote?id=${item.id}&how=un`} className="unvote-link">unvote</a></>
+                      )}
+                      {user && (
+                        <> | <a href={`/api/hide?id=${item.id}`}>hide</a></>
+                      )}
+                      {user && (
+                        <> | <a href={`/api/fave?id=${item.id}`}>favorite</a></>
+                      )}
+                      {user && user.username !== item.by && (
+                        <> | <a href={`/api/flag?id=${item.id}`}>flag</a></>
+                      )}
+                    </>
+                  )}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {formattedText && (
+        <div className="item-text" dangerouslySetInnerHTML={{ __html: formattedText }} />
+      )}
+      {item.type === 'poll' && (
+        <PollOptions pollId={item.id} userId={user?.userId} />
+      )}
+      {user && item.type !== 'job' && (
+        <div className="comment-form">
+          <form action={addComment}>
+            <input type="hidden" name="item_id" value={item.id} />
+            <textarea name="text" rows={8} cols={80}></textarea>
+            <br />
+            <input type="submit" value="add comment" />
+          </form>
+        </div>
+      )}
+      <CommentTree
+        comments={topLevelComments}
+        allComments={commentTree}
+        userVotes={userVotes}
+        currentUser={user}
+        canDownvote={canDownvote}
+        showDead={showDead}
+      />
+    </div>
+  );
+}
+
+async function CommentItemPage({ item, user }: { item: DbItem; user: { userId: number; username: string } | null }) {
+  // Show a comment with parent context
+  const parentItem = item.parent_id ? getItemById(item.parent_id) : null;
+  const storyItem = item.story_id ? getItemById(item.story_id) : null;
+
+  const formattedText = item.text || '';
+
+  const userVotes = new Map<number, string>();
+  let canDownvote = false;
+  if (user) {
+    const votes = getUserVotesForItems(user.userId, [item.id]);
+    for (const v of votes) {
+      userVotes.set(v.item_id, v.direction);
+    }
+    const dbUser = getUserByUsername(user.username);
+    canDownvote = (dbUser?.karma || 0) >= 500;
+  }
+
+  // Check edit window
+  const commentAge = Date.now() - new Date(item.created_at + 'Z').getTime();
+  const canEdit = user?.username === item.by && commentAge < 2 * 60 * 60 * 1000;
+
+  // Reply form uses the addComment server action from actions.ts
+
+  return (
+    <div>
+      <div className="comment-item">
+        <div className="comment-head">
+          <table style={{ borderSpacing: 0 }}>
+            <tbody>
+              <tr>
+                <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
+                  {(!user || user.username !== item.by) ? (
+                    <VoteArrows
+                      itemId={item.id}
+                      currentVote={userVotes.get(item.id) || null}
+                      itemType="comment"
+                      canDownvote={canDownvote}
+                      isLoggedIn={!!user}
+                    />
+                  ) : (
+                    <span className="vote-spacer" />
+                  )}
+                </td>
+                <td>
+                  <Link href={`/user?id=${item.by}`}>{item.by}</Link>
+                  {' '}
+                  {timeAgo(item.created_at)}
+                  {userVotes.get(item.id) === 'up' && user && (
+                    <> | <a href={`/api/vote?id=${item.id}&how=un`} className="unvote-link">unvote</a></>
+                  )}
+                  {user && (
+                    <> | <a href={`/api/fave?id=${item.id}`}>favorite</a></>
+                  )}
+                  {canEdit && (
+                    <> | <Link href={`/edit?id=${item.id}`}>edit</Link></>
+                  )}
+                  {user && (
+                    <> | <a href={`/api/flag?id=${item.id}`}>flag</a></>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="comment-body" dangerouslySetInnerHTML={{ __html: formattedText }} />
+      </div>
+      <div style={{ padding: '5px 0', fontSize: '8pt', color: '#828282' }}>
+        {storyItem && (
+          <>on: <Link href={`/item?id=${storyItem.id}`}>{storyItem.title}</Link></>
+        )}
+        {parentItem && (
+          <>
+            {storyItem && ' | '}
+            <Link href={`/item?id=${parentItem.id}`}>parent</Link>
+          </>
+        )}
+        {item.story_id && (
+          <>
+            {' | '}
+            <Link href={`/item?id=${item.story_id}`}>context</Link>
+          </>
+        )}
+      </div>
+      {user && (
+        <div className="comment-form">
+          <form action={addComment}>
+            <input type="hidden" name="item_id" value={item.id} />
+            <textarea name="text" rows={8} cols={80}></textarea>
+            <br />
+            <input type="submit" value="reply" />
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function PollOptions({ pollId, userId }: { pollId: number; userId?: number }) {
+  const options = getPollOptions(pollId);
+  if (options.length === 0) return null;
+
+  const totalPoints = options.reduce((sum, o) => sum + o.score, 0);
+  const userVotes = new Map<number, string>();
+  if (userId) {
+    const votes = getUserVotesForItems(userId, options.map(o => o.id));
+    for (const v of votes) {
+      userVotes.set(v.item_id, v.direction);
+    }
+  }
+
+  return (
+    <div style={{ padding: '10px 0' }}>
+      <table style={{ borderSpacing: '4px' }}>
+        <tbody>
+          {options.map((option) => {
+            const voted = userVotes.get(option.id) === 'up';
+            const pct = totalPoints > 0 ? Math.round((option.score / totalPoints) * 100) : 0;
+            return (
+              <tr key={option.id}>
+                <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
+                  {userId && !voted ? (
+                    <VoteArrows itemId={option.id} currentVote={null} itemType="story" isLoggedIn={true} />
+                  ) : voted ? (
+                    <span style={{ color: '#ff6600', fontSize: '10pt' }}>*</span>
+                  ) : (
+                    <span className="vote-spacer" />
+                  )}
+                </td>
+                <td style={{ fontSize: '10pt' }}>
+                  {option.title}
+                </td>
+                <td style={{ fontSize: '8pt', color: '#828282', paddingLeft: '8px' }}>
+                  {option.score} point{option.score !== 1 ? 's' : ''} ({pct}%)
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={{ fontSize: '8pt', color: '#828282', paddingTop: '4px' }}>
+        {totalPoints} point{totalPoints !== 1 ? 's' : ''} total
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,695 @@
+/* Hacker News Faithful CSS Clone */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  background-color: #f6f6ef;
+  color: #000;
+}
+
+a {
+  color: #000;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #828282;
+}
+
+/* Main Layout */
+.main-table {
+  width: 85%;
+  background-color: #f6f6ef;
+  border: 0;
+  border-spacing: 0;
+  border-collapse: collapse;
+  padding: 0;
+}
+
+/* Header */
+.header-row td {
+  background-color: #ff6600;
+  padding: 0;
+}
+
+.header-table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+  padding: 2px;
+}
+
+.header-table td {
+  padding: 2px;
+}
+
+.header-logo {
+  width: 18px;
+  height: 18px;
+  border: 1px solid white;
+  background-color: #ff6600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-logo span {
+  line-height: 1;
+}
+
+.header-nav {
+  font-size: 10pt;
+}
+
+.header-nav a,
+.header-nav a:visited,
+.header-site-name {
+  color: #000;
+}
+
+.header-site-name {
+  font-weight: bold;
+  font-size: 10pt;
+  margin-right: 10px;
+}
+
+.header-site-name a,
+.header-site-name a:visited {
+  color: #000;
+}
+
+.header-nav-links a,
+.header-nav-links a:visited {
+  color: #000;
+}
+
+.header-nav-sep {
+  color: #000;
+  padding: 0 3px;
+}
+
+.header-right {
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
+.header-right a,
+.header-right a:visited {
+  color: #000;
+}
+
+/* Spacer row */
+.spacer-row {
+  height: 10px;
+}
+
+/* Story list */
+.story-list {
+  padding: 0;
+}
+
+.story-row {
+  vertical-align: top;
+}
+
+.story-rank {
+  text-align: right;
+  vertical-align: top;
+  color: #828282;
+  font-size: 10pt;
+  padding-right: 5px;
+  padding-top: 3px;
+  min-width: 30px;
+}
+
+.story-vote-cell {
+  vertical-align: top;
+  padding-top: 4px;
+  width: 14px;
+}
+
+.vote-arrow-up {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 10px solid #999;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.vote-arrow-up.voted {
+  border-bottom-color: #ff6600;
+}
+
+.vote-arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 10px solid #999;
+  cursor: pointer;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.vote-arrow-down.voted {
+  border-top-color: #ff6600;
+}
+
+.vote-spacer {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}
+
+.story-title-cell {
+  vertical-align: top;
+  padding-top: 1px;
+}
+
+.story-title a.story-link {
+  font-size: 10pt;
+  color: #000;
+  text-decoration: none;
+}
+
+.story-title a.story-link:visited {
+  color: #828282;
+}
+
+.story-domain {
+  font-size: 8pt;
+  color: #828282;
+  margin-left: 5px;
+}
+
+.story-domain a,
+.story-domain a:visited {
+  color: #828282;
+}
+
+.story-subtext {
+  font-size: 7pt;
+  color: #828282;
+  padding-top: 2px;
+  padding-bottom: 7px;
+}
+
+.story-subtext a,
+.story-subtext a:visited {
+  color: #828282;
+}
+
+.story-subtext a:hover {
+  text-decoration: underline;
+}
+
+/* More link */
+.more-link {
+  padding: 10px 0 10px 42px;
+}
+
+.more-link a,
+.more-link a:visited {
+  color: #000;
+  font-size: 10pt;
+}
+
+/* Item page */
+.item-header {
+  padding: 5px 0;
+}
+
+.item-text {
+  padding: 0 0 10px 0;
+  max-width: 600px;
+  overflow-wrap: break-word;
+}
+
+.item-text p {
+  margin-bottom: 8px;
+}
+
+.item-text pre {
+  overflow-x: auto;
+  margin: 8px 0;
+  max-width: 600px;
+}
+
+.item-text code {
+  font-size: 9pt;
+  white-space: pre;
+}
+
+.item-text a {
+  color: #000;
+}
+
+.item-text a:visited {
+  color: #828282;
+}
+
+.item-text i {
+  font-style: italic;
+}
+
+/* Comment form */
+.comment-form {
+  padding: 10px 0;
+}
+
+.comment-form textarea {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 490px;
+  height: 60px;
+  border: 1px solid #999;
+}
+
+.comment-form input[type="submit"] {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Comment tree */
+.comment-tree {
+  margin-top: 10px;
+}
+
+.comment-item {
+  padding: 8px 0 0 0;
+}
+
+.comment-head {
+  font-size: 8pt;
+  color: #828282;
+  padding-bottom: 4px;
+}
+
+.comment-head a,
+.comment-head a:visited {
+  color: #828282;
+}
+
+.comment-head .hn-user {
+  color: #828282;
+}
+
+.comment-body {
+  font-size: 9pt;
+  overflow-wrap: break-word;
+  max-width: 1215px;
+  line-height: 1.4;
+}
+
+.comment-body p {
+  margin-bottom: 8px;
+}
+
+.comment-body pre {
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.comment-body code {
+  font-size: 9pt;
+  white-space: pre;
+}
+
+.comment-body a {
+  color: #000;
+}
+
+.comment-body a:visited {
+  color: #828282;
+}
+
+.comment-reply {
+  font-size: 8pt;
+  padding: 4px 0 2px 0;
+}
+
+.comment-reply a {
+  color: #828282;
+  text-decoration: underline;
+}
+
+.comment-indent {
+  display: inline-block;
+}
+
+.comment-dead {
+  opacity: 0.35;
+}
+
+.comment-collapsed .comment-body,
+.comment-collapsed .comment-reply,
+.comment-collapsed .comment-children {
+  display: none;
+}
+
+.toggle-btn {
+  cursor: pointer;
+  color: #828282;
+  font-size: 8pt;
+  display: inline;
+  margin-left: 3px;
+  border: none;
+  background: none;
+  font-family: Verdana, Geneva, sans-serif;
+  padding: 0;
+}
+
+/* User page */
+.user-page {
+  padding: 10px 0;
+}
+
+.user-page table {
+  border-spacing: 5px;
+}
+
+.user-page td:first-child {
+  vertical-align: top;
+  text-align: right;
+  color: #828282;
+  padding-right: 5px;
+  white-space: nowrap;
+}
+
+.user-page td:last-child {
+  vertical-align: top;
+}
+
+.user-page textarea {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 400px;
+  height: 60px;
+  border: 1px solid #999;
+}
+
+.user-page input[type="text"],
+.user-page input[type="email"] {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 400px;
+  border: 1px solid #999;
+}
+
+.user-page select {
+  font-size: 10pt;
+}
+
+.user-links {
+  padding-top: 10px;
+  font-size: 10pt;
+}
+
+.user-links a,
+.user-links a:visited {
+  color: #000;
+}
+
+/* Login page */
+.login-page {
+  padding: 10px 0 10px 40px;
+}
+
+.login-page table {
+  border-spacing: 5px;
+}
+
+.login-page td:first-child {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.login-page input[type="text"],
+.login-page input[type="password"] {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 200px;
+  border: 1px solid #999;
+}
+
+.login-page input[type="submit"] {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  margin-top: 5px;
+}
+
+.login-page a,
+.login-page a:visited {
+  color: #000;
+}
+
+.login-error {
+  color: #ff0000;
+  font-size: 10pt;
+  margin-bottom: 10px;
+}
+
+/* Submit page */
+.submit-page {
+  padding: 10px 0 10px 40px;
+}
+
+.submit-page table {
+  border-spacing: 5px;
+}
+
+.submit-page td:first-child {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.submit-page input[type="text"] {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 400px;
+  border: 1px solid #999;
+}
+
+.submit-page textarea {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 400px;
+  height: 60px;
+  border: 1px solid #999;
+}
+
+.submit-page input[type="submit"] {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+}
+
+.submit-page .help-text {
+  font-size: 8pt;
+  color: #828282;
+  margin-top: 10px;
+}
+
+/* Leaders page */
+.leaders-table {
+  border-spacing: 5px;
+  padding: 10px 0;
+}
+
+.leaders-table td {
+  padding: 2px 5px;
+}
+
+/* Change password page */
+.changepw-page {
+  padding: 10px 0 10px 40px;
+}
+
+.changepw-page table {
+  border-spacing: 5px;
+}
+
+.changepw-page td:first-child {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.changepw-page input[type="password"] {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 200px;
+  border: 1px solid #999;
+}
+
+.changepw-page input[type="submit"] {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+}
+
+/* Static pages */
+.static-page {
+  padding: 10px 0 10px 40px;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.static-page h2 {
+  font-size: 12pt;
+  margin: 15px 0 8px 0;
+}
+
+.static-page p {
+  margin-bottom: 10px;
+}
+
+.static-page ul {
+  margin: 10px 0 10px 20px;
+}
+
+.static-page li {
+  margin-bottom: 5px;
+}
+
+/* Footer */
+.footer-row td {
+  padding-top: 10px;
+  text-align: center;
+  border-top: 2px solid #ff6600;
+  padding-bottom: 20px;
+}
+
+.footer-links {
+  font-size: 8pt;
+  color: #828282;
+  padding: 10px 0;
+}
+
+.footer-links a,
+.footer-links a:visited {
+  color: #828282;
+}
+
+.footer-search {
+  padding: 5px 0;
+}
+
+.footer-search input[type="text"] {
+  font-size: 10pt;
+  width: 200px;
+  border: 1px solid #999;
+}
+
+/* Comment list pages (newcomments, bestcomments, etc.) */
+.comment-list-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #e0ddd5;
+}
+
+.comment-list-item:last-child {
+  border-bottom: none;
+}
+
+.comment-on-link {
+  font-size: 8pt;
+  color: #828282;
+  padding-bottom: 4px;
+}
+
+.comment-on-link a,
+.comment-on-link a:visited {
+  color: #828282;
+}
+
+/* Reply page */
+.reply-page {
+  padding: 10px 0;
+}
+
+.reply-page .parent-comment {
+  padding: 10px 0;
+  border-bottom: 1px solid #e0ddd5;
+  margin-bottom: 10px;
+}
+
+/* Edit page */
+.edit-page {
+  padding: 10px 0;
+}
+
+.edit-page textarea {
+  font-family: monospace;
+  font-size: 10pt;
+  width: 490px;
+  height: 100px;
+  border: 1px solid #999;
+}
+
+/* Lists page */
+.lists-page {
+  padding: 10px 0 10px 40px;
+}
+
+.lists-page a {
+  display: block;
+  padding: 3px 0;
+}
+
+/* Error styling */
+.error-msg {
+  color: #ff0000;
+  font-size: 10pt;
+}
+
+/* Nofollow external links */
+a[rel="nofollow"] {
+  color: #000;
+}
+
+a[rel="nofollow"]:visited {
+  color: #828282;
+}
+
+/* Dead items */
+.dead-item {
+  opacity: 0.35;
+}
+
+.dead-tag {
+  color: #828282;
+  font-size: 8pt;
+}
+
+/* Unvote link */
+.unvote-link {
+  font-size: 7pt;
+  color: #828282;
+  cursor: pointer;
+}
+
+/* Faded downvoted comments */
+.comment-score-negative {
+  color: #ccc;
+}
+
+/* Content row */
+.content-cell {
+  padding: 0 5px;
+}
+
+/* Empty state */
+.empty-state {
+  padding: 20px 0;
+  color: #828282;
+  font-size: 10pt;
+}

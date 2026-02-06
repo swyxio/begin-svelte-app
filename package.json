@@ -1,32 +1,30 @@
 {
-  "name": "begin-app",
-  "version": "0.0.1",
-  "description": "Begin basic Svelte app + API",
+  "name": "hacker-news-clone",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "rollup -c",
-    "autobuild": "rollup -c -w",
-    "dev": "run-p start autobuild",
-    "lint": "eslint src --ignore-pattern node_modules --fix",
-    "start": "npm run build && npx sandbox",
-    "start:sandbox": "cross-env NODE_ENV=testing ARC_LOCAL=1 npx sandbox",
-    "test": "cross-env NODE_ENV=testing PORT=6666 tape test/*-test.js ./test/**/*-test.js | tap-spec"
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "seed": "node scripts/seed.mjs",
+    "dev:fresh": "node scripts/seed.mjs && next dev --port 3000",
+    "test:e2e": "node test/e2e.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.8.2",
+    "iron-session": "^8.0.4",
+    "next": "^15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@architect/sandbox": "latest",
-    "@begin/data": "^1.1.4",
-    "cross-env": "^5.2.1",
-    "eslint": "^6.4.0",
-    "eslint-plugin-svelte3": "^2.7.3",
-    "npm-run-all": "^4.1.5",
-    "rollup": "^1.21.4",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-livereload": "^1.0.1",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-svelte": "^5.1.0",
-    "rollup-plugin-terser": "^5.1.2",
-    "svelte": "^3.12.1",
-    "tap-spec": "^5.0.0",
-    "tape": "^4.11.0",
-    "tiny-json-http": "^7.1.2"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "puppeteer": "^24.37.1",
+    "typescript": "^5.8.0"
   }
 }
