@@ -225,11 +225,21 @@ export function getComments(options: { storyId?: number; parentId?: number; byUs
   return db.prepare(`SELECT * FROM items ${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`).all(...params, limit, offset) as DbItem[];
 }
 
-export function getCommentsByStory(storyId: number) {
+export function getCommentsByStory(storyId: number, currentUsername?: string) {
   const db = getDb();
-  return db.prepare(
-    "SELECT * FROM items WHERE story_id = ? AND type = 'comment' AND deleted = 0 ORDER BY created_at ASC"
-  ).all(storyId) as DbItem[];
+  // Filter out comments from users with delay settings whose comments are younger than the delay
+  // But always show the current user's own comments
+  return db.prepare(`
+    SELECT i.* FROM items i
+    LEFT JOIN users u ON i.by = u.username COLLATE NOCASE
+    WHERE i.story_id = ? AND i.type = 'comment' AND i.deleted = 0
+    AND (
+      u.delay = 0
+      OR i.by = ? COLLATE NOCASE
+      OR datetime(i.created_at, '+' || u.delay || ' minutes') <= datetime('now')
+    )
+    ORDER BY i.created_at ASC
+  `).all(storyId, currentUsername || '') as DbItem[];
 }
 
 export function getChildComments(parentId: number) {

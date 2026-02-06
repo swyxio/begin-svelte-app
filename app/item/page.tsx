@@ -23,7 +23,7 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
   }
 
   // It's a story or job
-  const comments = getCommentsByStory(item.id);
+  const comments = getCommentsByStory(item.id, user?.username);
   const commentTree = buildCommentTree(comments);
   const topLevelComments = commentTree.get(item.id) || [];
 

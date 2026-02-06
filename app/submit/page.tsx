@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/session';
-import { createItem, getItemByUrl } from '@/lib/db';
 
-export default async function SubmitPage() {
+export default async function SubmitPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect('/login?goto=/submit');
+
+  const error = typeof params.error === 'string' ? params.error : null;
 
   async function handleSubmit(formData: FormData) {
     'use server';
@@ -26,6 +28,7 @@ export default async function SubmitPage() {
 
     // Check for duplicate URL
     if (url) {
+      const { getItemByUrl } = await import('@/lib/db');
       const existing = getItemByUrl(url);
       if (existing) {
         redirect(`/item?id=${existing.id}`);
@@ -33,17 +36,15 @@ export default async function SubmitPage() {
     }
 
     // Determine type
-    let type = 'story';
-    if (title.toLowerCase().startsWith('ask hn:') && !url) {
-      type = 'story'; // Ask HN is still type story, detected by title prefix
-    }
+    const type = 'story';
 
+    const { createItem } = await import('@/lib/db');
     const itemId = createItem({
       type,
       by: currentUser.username,
       title,
       url: url || undefined,
-      text: text || undefined,
+      text: text || undefined,  // Store raw text, format at render time
     });
 
     redirect(`/item?id=${itemId}`);
@@ -51,6 +52,7 @@ export default async function SubmitPage() {
 
   return (
     <div className="submit-page">
+      {error && <div className="login-error">{error}</div>}
       <form action={handleSubmit}>
         <table>
           <tbody>
