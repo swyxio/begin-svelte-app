@@ -31,6 +31,7 @@
   let submitError = ''
 
   let commentText = ''
+  let deleteError = ''
   let showEditForm = false
   let editTitle = ''
   let editUrl = ''
@@ -148,6 +149,7 @@
     showEditForm = false
     commentText = ''
     submitError = ''
+    deleteError = ''
 
     try {
       if (listPages.includes(route.page)) {
@@ -312,10 +314,11 @@
 
   async function handleDeleteItem (item) {
     try {
+      deleteError = ''
       await apiPost('delete-item', { itemId: item.id })
       await refresh()
     } catch (err) {
-      error = err.message
+      deleteError = err.message
     }
   }
 
@@ -513,6 +516,9 @@
         </div>
         {#if itemDetail.item.text}
           <div class="item-text">{itemDetail.item.text}</div>
+        {/if}
+        {#if deleteError}
+          <div class="alert error">{deleteError}</div>
         {/if}
 
         {#if showEditForm && itemDetail.item.canEdit}
