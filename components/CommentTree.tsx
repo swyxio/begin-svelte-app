@@ -8,6 +8,7 @@ interface CommentTreeProps {
   userVotes?: Map<number, string>;
   currentUser?: { userId: number; username: string } | null;
   canDownvote?: boolean;
+  showDead?: boolean;
 }
 
 export function CommentTree({
@@ -17,11 +18,14 @@ export function CommentTree({
   userVotes = new Map(),
   currentUser = null,
   canDownvote = false,
+  showDead = false,
 }: CommentTreeProps) {
   return (
     <div className="comment-tree">
       {comments.map((comment) => {
         const children = allComments.get(comment.id) || [];
+        // Skip dead comments unless showDead is enabled
+        if (comment.dead === 1 && !showDead) return null;
         return (
           <div key={comment.id}>
             <CommentItem
@@ -30,6 +34,7 @@ export function CommentTree({
               userVote={userVotes.get(comment.id) || null}
               currentUser={currentUser}
               canDownvote={canDownvote}
+              showDead={showDead}
             />
             {children.length > 0 && (
               <CommentTree
@@ -39,6 +44,7 @@ export function CommentTree({
                 userVotes={userVotes}
                 currentUser={currentUser}
                 canDownvote={canDownvote}
+                showDead={showDead}
               />
             )}
           </div>

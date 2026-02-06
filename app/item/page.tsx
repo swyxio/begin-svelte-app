@@ -31,6 +31,7 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
   const allItemIds = [item.id, ...comments.map(c => c.id)];
   const userVotes = new Map<number, string>();
   let canDownvote = false;
+  let showDead = false;
   if (user) {
     const votes = getUserVotesForItems(user.userId, allItemIds);
     for (const v of votes) {
@@ -38,6 +39,7 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
     }
     const dbUser = getUserByUsername(user.username);
     canDownvote = (dbUser?.karma || 0) >= 500;
+    showDead = dbUser?.showdead === 1;
   }
 
   const domain = item.url ? extractDomain(item.url) : null;
@@ -139,6 +141,7 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
         userVotes={userVotes}
         currentUser={user}
         canDownvote={canDownvote}
+        showDead={showDead}
       />
     </div>
   );

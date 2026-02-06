@@ -14,6 +14,7 @@ interface CommentItemProps {
   canDownvote?: boolean;
   showContext?: boolean;
   storyTitle?: string;
+  showDead?: boolean;
 }
 
 export function CommentItem({
@@ -24,16 +25,21 @@ export function CommentItem({
   canDownvote = false,
   showContext = false,
   storyTitle,
+  showDead = false,
 }: CommentItemProps) {
   const [collapsed, setCollapsed] = useState(false);
   const isDead = comment.dead === 1;
   const isDeleted = comment.deleted === 1;
   const indent = depth * 40;
 
-  // Check if comment is within edit window (~2 hours)
+  // Don't render dead items unless showDead is on
+  if (isDead && !showDead && !currentUser) return null;
+
+  // Check time-based capabilities
   const commentAge = Date.now() - new Date(comment.created_at + 'Z').getTime();
   const canEdit = currentUser?.username === comment.by && commentAge < 2 * 60 * 60 * 1000;
   const canDelete = currentUser?.username === comment.by && commentAge < 15 * 60 * 1000;
+  const isOwnComment = currentUser?.username === comment.by;
 
   return (
     <div
@@ -45,7 +51,7 @@ export function CommentItem({
           <tbody>
             <tr>
               <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
-                {!isDeleted && (!currentUser || currentUser.username !== comment.by) ? (
+                {!isDeleted && !isOwnComment ? (
                   <VoteArrows
                     itemId={comment.id}
                     currentVote={userVote}
@@ -64,11 +70,14 @@ export function CommentItem({
                     {' '}
                     <Link href={`/item?id=${comment.id}`}>{timeAgo(comment.created_at)}</Link>
                     {isDead && <span className="dead-tag"> [dead]</span>}
-                    {' '}
                     {currentUser && userVote === 'up' && (
-                      <>
-                        | <a href={`/api/vote?id=${comment.id}&how=un`} className="unvote-link">unvote</a>
-                      </>
+                      <> | <a href={`/api/vote?id=${comment.id}&how=un`} className="unvote-link">unvote</a></>
+                    )}
+                    {isDead && showDead && currentUser && (
+                      <> | <a href={`/api/vouch?id=${comment.id}`} style={{ color: '#828282', fontSize: '8pt' }}>vouch</a></>
+                    )}
+                    {currentUser && !isOwnComment && !isDead && (
+                      <> | <a href={`/api/flag?id=${comment.id}`} style={{ color: '#828282', fontSize: '8pt' }}>flag</a></>
                     )}
                   </>
                 ) : (
@@ -79,7 +88,7 @@ export function CommentItem({
                   className="toggle-btn"
                   onClick={() => setCollapsed(!collapsed)}
                 >
-                  [{collapsed ? `+${depth > 0 ? '' : ''}` : '–'}]
+                  [{collapsed ? '+' : '\u2013'}]
                 </button>
               </td>
             </tr>
@@ -103,16 +112,10 @@ export function CommentItem({
             <div className="comment-reply">
               <Link href={`/reply?id=${comment.id}`}>reply</Link>
               {canEdit && (
-                <>
-                  {' | '}
-                  <Link href={`/edit?id=${comment.id}`}>edit</Link>
-                </>
+                <> | <Link href={`/edit?id=${comment.id}`}>edit</Link></>
               )}
               {canDelete && (
-                <>
-                  {' | '}
-                  <a href={`/api/delete?id=${comment.id}&confirm=true`}>delete</a>
-                </>
+                <> | <a href={`/api/delete?id=${comment.id}&confirm=true`}>delete</a></>
               )}
             </div>
           )}

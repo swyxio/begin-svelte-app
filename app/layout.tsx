@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { NoprocrastGate } from '@/components/NoprocrastGate';
 
 export const metadata: Metadata = {
   title: 'Hacker News',
@@ -31,7 +32,9 @@ export default function RootLayout({
               </tr>
               <tr>
                 <td className="content-cell">
-                  {children}
+                  <NoprocrastGate>
+                    {children}
+                  </NoprocrastGate>
                 </td>
               </tr>
               <tr className="footer-row">
