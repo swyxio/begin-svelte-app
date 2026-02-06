@@ -309,6 +309,38 @@ test('Get comments listing', async t => {
   t.equal(thread.rootBy, 'alice', 'Comments listing includes root author')
 })
 
+test('Edit and delete item', async t => {
+  t.plan(4)
+  let created = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: submitterCookie },
+    data: { action: 'create-item', type: 'story', title: 'Temp story', url: 'https://example.com/temp' }
+  })
+  let tempId = created.body.item.id
+  let edit = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: submitterCookie },
+    data: { action: 'edit-item', itemId: tempId, title: 'Updated title' }
+  })
+  t.equal(edit.body.item.title, 'Updated title', 'Item title updated')
+  let detail = await tiny.get({
+    url: `${url}/api?action=item&id=${tempId}`,
+    headers: { cookie: submitterCookie }
+  })
+  t.equal(detail.body.item.title, 'Updated title', 'Item detail shows updated title')
+  let deleted = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: submitterCookie },
+    data: { action: 'delete-item', itemId: tempId }
+  })
+  t.ok(deleted.body.item.deleted, 'Item deleted')
+  let detailAfter = await tiny.get({
+    url: `${url}/api?action=item&id=${tempId}`,
+    headers: { cookie: submitterCookie }
+  })
+  t.equal(detailAfter.body.item.title, '[deleted]', 'Deleted item title masked')
+})
+
 test('Shut down sandbox', t => {
   t.plan(1)
   end()
