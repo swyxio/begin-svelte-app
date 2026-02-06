@@ -85,7 +85,7 @@
 
   <div class="comment-text">
     {#if comment.deleted}
-      <span class="deleted">[deleted]</span>
+      <span class="deleted">{comment.text || '[deleted]'}</span>
     {:else}
       {@html renderedText}
     {/if}

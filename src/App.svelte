@@ -447,7 +447,7 @@
             </span>
             <div class="item-main">
               {#if item.deleted}
-                <span class="title deleted">[deleted]</span>
+                <span class="title deleted">{item.title || '[deleted]'}</span>
               {:else}
                 <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">
                   {item.title}
@@ -521,7 +521,7 @@
           </span>
           <div class="item-main">
             {#if itemDetail.item.deleted}
-              <span class="title deleted">[deleted]</span>
+              <span class="title deleted">{itemDetail.item.title || '[deleted]'}</span>
             {:else}
               <a class="title" href={itemLink(itemDetail.item)} target={itemLinkTarget(itemDetail.item)} rel="noreferrer">
                 {itemDetail.item.title}
@@ -767,7 +767,7 @@
               <span class="rank">•</span>
               <div class="item-main">
                 {#if item.deleted}
-                  <span class="title deleted">[deleted]</span>
+                  <span class="title deleted">{item.title || '[deleted]'}</span>
                 {:else}
                   <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">{item.title}</a>
                   {#if item.domain}
@@ -799,7 +799,7 @@
               <span class="rank">•</span>
               <div class="item-main">
                 {#if item.deleted}
-                  <span class="title deleted">[deleted]</span>
+                  <span class="title deleted">{item.title || '[deleted]'}</span>
                 {:else}
                   <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">{item.title}</a>
                   {#if item.domain}
