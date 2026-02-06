@@ -217,6 +217,7 @@ async function getUserProfile (username, viewer) {
     throw createError('User not found.', 404)
   }
   let state = getUserState(records, viewer)
+  let items = records.filter(record => ITEM_TYPES.includes(record.type))
   let submissions = records
     .filter(record => ITEM_TYPES.includes(record.type))
     .filter(record => record.by === username && record.type !== 'comment')
@@ -227,7 +228,16 @@ async function getUserProfile (username, viewer) {
     .filter(record => ITEM_TYPES.includes(record.type))
     .filter(record => record.by === username && record.type === 'comment')
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map(record => serializeItem(record, state, viewer))
+    .map(record => {
+      let serialized = serializeItem(record, state, viewer)
+      if (serialized.rootId) {
+        let root = items.find(item => ensureItemId(item) === serialized.rootId)
+        if (root) {
+          serialized.rootTitle = root.title
+        }
+      }
+      return serialized
+    })
 
   return {
     user: sanitizeUser(user),

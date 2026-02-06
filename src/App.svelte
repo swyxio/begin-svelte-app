@@ -723,6 +723,10 @@
               <div class="comment-meta">
                 {comment.score} points by <span>{comment.by}</span>
                 {timeAgo(comment.createdAt)}
+                {#if comment.rootTitle}
+                  <span class="sep">|</span>
+                  <a href={`#/item?id=${comment.rootId}`}>{comment.rootTitle}</a>
+                {/if}
               </div>
               <div class="comment-text">{comment.text}</div>
             </div>
