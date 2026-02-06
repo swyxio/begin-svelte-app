@@ -7,6 +7,7 @@ let end
 let authorCookie
 let readerCookie
 let itemId
+let jobId
 
 test('Set up env', t => {
   t.plan(1)
@@ -51,7 +52,8 @@ test('Register author and create item', async t => {
       text: 'Email us.'
     }
   })
-  t.ok(job.body.item.id, 'Created job item')
+  jobId = job.body.item.id
+  t.ok(jobId, 'Created job item')
 
   try {
     await tiny.post({
@@ -90,13 +92,25 @@ test('Register author and create item', async t => {
 })
 
 test('Register reader and favorite/hide', async t => {
-  t.plan(4)
+  t.plan(6)
   let register = await tiny.post({
     url: `${url}/api`,
     data: { action: 'register', username: 'dave', password: 'password123' }
   })
   readerCookie = register.headers['set-cookie'][0].split(';')[0]
   t.ok(readerCookie, 'Reader session ready')
+
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: readerCookie },
+      data: { action: 'vote', itemId: jobId }
+    })
+    t.fail('Job votes should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 400, 'Job votes rejected')
+    t.equal(err.body.status, 400, 'Job vote includes status')
+  }
 
   await tiny.post({
     url: `${url}/api`,
