@@ -1,9 +1,87 @@
-exports.handler = async function http (req) {
-  console.log('Begin API called')
+const hn = require('../../shared/hn')
+const { getSessionFromRequest } = require('../../shared/auth')
+const { getByKey, KEY_PREFIXES } = require('../../shared/db')
+
+function jsonResponse (statusCode, payload, headers = {}) {
   return {
-    headers: {'content-type': 'application/json; charset=utf8'},
-    body: JSON.stringify({
-      msg: 'Hello from Svelte + your Begin API!'
-    })
+    statusCode,
+    headers: {
+      'content-type': 'application/json; charset=utf8',
+      ...headers
+    },
+    body: JSON.stringify(payload)
+  }
+}
+
+exports.handler = async function http (req) {
+  try {
+    let query = req.queryStringParameters || {}
+    let action = query.action
+    let session = await getSessionFromRequest(req)
+    let username = session ? session.username : null
+
+    console.log('hn-api-get', JSON.stringify({ action, username, query }))
+
+    if (!action) {
+      return jsonResponse(400, { error: 'Missing action.' })
+    }
+
+    if (action === 'me') {
+      if (!username) {
+        return jsonResponse(200, { user: null })
+      }
+      let user = await getByKey(`${KEY_PREFIXES.user}${username}`)
+      if (!user) {
+        return jsonResponse(200, { user: null })
+      }
+      return jsonResponse(200, { user: { username: user.username, karma: user.karma || 0, createdAt: user.createdAt, about: user.about || '' } })
+    }
+
+    if (action === 'items') {
+      let sort = query.sort || 'top'
+      let type = query.type || null
+      let page = Number(query.page || 1)
+      let data = await hn.listItems({ sort, type, page, username })
+      return jsonResponse(200, data)
+    }
+
+    if (action === 'item') {
+      let id = query.id
+      let data = await hn.getItemDetail({ id, username })
+      return jsonResponse(200, data)
+    }
+
+    if (action === 'user') {
+      let data = await hn.getUserProfile(query.username, username)
+      return jsonResponse(200, data)
+    }
+
+    if (action === 'threads') {
+      let data = await hn.getUserThreads(query.username, username)
+      return jsonResponse(200, data)
+    }
+
+    if (action === 'favorites') {
+      let target = query.username || username
+      if (!target) {
+        return jsonResponse(400, { error: 'Missing username.' })
+      }
+      let data = await hn.getUserFavorites(target, username)
+      return jsonResponse(200, data)
+    }
+
+    if (action === 'hidden') {
+      let target = query.username || username
+      if (!target) {
+        return jsonResponse(400, { error: 'Missing username.' })
+      }
+      let data = await hn.getUserHidden(target, username)
+      return jsonResponse(200, data)
+    }
+
+    return jsonResponse(404, { error: 'Unknown action.' })
+  } catch (error) {
+    console.error(error)
+    return jsonResponse(error.status || 500, { error: error.message || 'Server error.' })
   }
 }

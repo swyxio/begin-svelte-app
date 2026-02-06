@@ -53,6 +53,11 @@ function parseItemId (record) {
   return parts[parts.length - 1]
 }
 
+function ensureItemId (record) {
+  if (!record) return null
+  return record.id || parseItemId(record)
+}
+
 function getUserState (records, username) {
   let state = {
     votes: new Set(),
@@ -76,7 +81,7 @@ function getUserState (records, username) {
 
 function serializeItem (item, state, viewer) {
   if (!item) return null
-  let id = item.id || item.key.replace(KEY_PREFIXES.item, '')
+  let id = ensureItemId(item)
   let isOwner = viewer && viewer === item.by
   return {
     id,
@@ -208,7 +213,7 @@ async function getUserThreads (username, viewer) {
     .map(record => {
       let serialized = serializeItem(record, state, viewer)
       if (serialized.rootId) {
-        let root = items.find(item => item.id === serialized.rootId)
+        let root = items.find(item => ensureItemId(item) === serialized.rootId)
         if (root) {
           serialized.rootTitle = root.title
         }
@@ -229,7 +234,7 @@ async function getUserFavorites (username, viewer) {
   let items = records.filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
   let favoritesList = favorites.map(record => {
     let itemId = parseItemId(record)
-    let item = items.find(entry => entry.id === itemId)
+    let item = items.find(entry => ensureItemId(entry) === itemId)
     return serializeItem(item, state, viewer)
   }).filter(Boolean)
 
@@ -245,7 +250,7 @@ async function getUserHidden (username, viewer) {
   let items = records.filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
   let hiddenList = hidden.map(record => {
     let itemId = parseItemId(record)
-    let item = items.find(entry => entry.id === itemId)
+    let item = items.find(entry => ensureItemId(entry) === itemId)
     return serializeItem(item, state, viewer)
   }).filter(Boolean)
 
@@ -266,7 +271,7 @@ async function listItems ({ sort = 'top', type, page = 1, username }) {
   }
 
   if (username && state.hidden.size) {
-    items = items.filter(record => !state.hidden.has(record.id))
+    items = items.filter(record => !state.hidden.has(ensureItemId(record)))
   }
 
   if (sort === 'new') {
