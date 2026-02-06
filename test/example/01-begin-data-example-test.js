@@ -20,7 +20,7 @@ test('Start sandbox', async t => {
 })
 
 test('Register author and create item', async t => {
-  t.plan(3)
+  t.plan(4)
   let register = await tiny.post({
     url: `${url}/api`,
     data: { action: 'register', username: 'cathy', password: 'password123' }
@@ -41,11 +41,18 @@ test('Register author and create item', async t => {
   itemId = create.body.item.id
   t.ok(itemId, 'Created ask item')
 
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: { action: 'update-profile', about: 'I love HN.' }
+  })
+
   let profile = await tiny.get({
     url: `${url}/api?action=user&username=cathy`,
     headers: { cookie: authorCookie }
   })
   t.ok(profile.body.submissions.length >= 1, 'Profile submissions returned')
+  t.equal(profile.body.user.about, 'I love HN.', 'Profile about updated')
 })
 
 test('Register reader and favorite/hide', async t => {

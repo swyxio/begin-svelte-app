@@ -180,6 +180,33 @@ async function authenticateUser ({ username, password }) {
   return sanitizeUser(user)
 }
 
+async function updateUserProfile ({ username, about, password }) {
+  if (!username) {
+    throw createError('You must be logged in.', 401)
+  }
+  let user = await getByKey(`${KEY_PREFIXES.user}${username}`)
+  if (!user) {
+    throw createError('User not found.', 404)
+  }
+
+  if (typeof about === 'string') {
+    if (about.length > 5000) {
+      throw createError('About section is too long.')
+    }
+    user.about = about
+  }
+
+  if (password) {
+    if (password.length < 6) {
+      throw createError('Password must be at least 6 characters.')
+    }
+    user.passwordHash = hashPassword(password)
+  }
+
+  await setRecord(user)
+  return sanitizeUser(user)
+}
+
 async function getUserProfile (username, viewer) {
   let records = await listAll()
   let user = records.find(record => record.key === `${KEY_PREFIXES.user}${username}`)
@@ -612,6 +639,7 @@ module.exports = {
   PAGE_SIZE,
   registerUser,
   authenticateUser,
+  updateUserProfile,
   getUserProfile,
   getUserThreads,
   getUserFavorites,

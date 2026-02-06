@@ -81,6 +81,15 @@ exports.handler = async function http (req) {
       })
     }
 
+    if (action === 'update-profile') {
+      let user = await hn.updateUserProfile({
+        username,
+        about: body.about,
+        password: body.password
+      })
+      return jsonResponse(200, { user })
+    }
+
     if (action === 'create-item') {
       let item = await hn.createItem({
         type: body.type,

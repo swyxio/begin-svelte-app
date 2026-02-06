@@ -32,6 +32,10 @@
 
   let commentText = ''
   let deleteError = ''
+
+  let profileAbout = ''
+  let profilePassword = ''
+  let profileMessage = ''
   let showEditForm = false
   let editTitle = ''
   let editUrl = ''
@@ -150,6 +154,7 @@
     commentText = ''
     submitError = ''
     deleteError = ''
+    profileMessage = ''
 
     try {
       if (listPages.includes(route.page)) {
@@ -173,6 +178,8 @@
         let id = route.params.get('id')
         let data = await apiGet('user', { username: id })
         userProfile = data
+        profileAbout = data.user.about || ''
+        profilePassword = ''
       } else if (route.page === 'threads') {
         let id = route.params.get('id')
         let data = await apiGet('threads', { username: id })
@@ -347,6 +354,22 @@
 
   async function handleDeleteComment (comment) {
     await handleDeleteItem(comment)
+  }
+
+  async function handleProfileSave () {
+    profileMessage = ''
+    try {
+      let payload = { about: profileAbout }
+      if (profilePassword) {
+        payload.password = profilePassword
+      }
+      await apiPost('update-profile', payload)
+      profilePassword = ''
+      profileMessage = 'Profile updated.'
+      await refresh()
+    } catch (err) {
+      profileMessage = err.message
+    }
   }
 
   onMount(async () => {
@@ -636,6 +659,23 @@
         <div>Created: {formatDate(userProfile.user.createdAt)}</div>
         <div>Karma: {userProfile.user.karma}</div>
         <div class="about">{userProfile.user.about}</div>
+        {#if currentUser && currentUser.username === userProfile.user.username}
+          <div class="profile-edit">
+            <h3>Edit profile</h3>
+            {#if profileMessage}
+              <div class="alert">{profileMessage}</div>
+            {/if}
+            <label>
+              about
+              <textarea rows="4" bind:value={profileAbout}></textarea>
+            </label>
+            <label>
+              new password
+              <input type="password" bind:value={profilePassword} placeholder="leave blank to keep" />
+            </label>
+            <button on:click={handleProfileSave}>save profile</button>
+          </div>
+        {/if}
         <div class="profile-links">
           <a href={`#/threads?id=${userProfile.user.username}`}>threads</a>
           <span class="sep">|</span>
