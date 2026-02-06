@@ -312,6 +312,10 @@ async function listItems ({ sort = 'top', type, page = 1, username }) {
     items = items.filter(record => !state.hidden.has(ensureItemId(record)))
   }
 
+  if (type === 'job') {
+    sort = 'new'
+  }
+
   if (sort === 'new') {
     items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   } else {

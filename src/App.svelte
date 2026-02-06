@@ -102,7 +102,7 @@
   }
 
   function canVote (item) {
-    return currentUser && item && item.by && item.by !== currentUser.username && !item.deleted
+    return currentUser && item && item.by && item.by !== currentUser.username && !item.deleted && item.type !== 'job'
   }
 
   async function apiGet (action, params = {}) {
@@ -162,8 +162,8 @@
 
     try {
       if (listPages.includes(route.page)) {
-        let sort = route.page === 'new' ? 'new' : 'top'
         let type = route.page === 'ask' ? 'ask' : route.page === 'show' ? 'show' : route.page === 'jobs' ? 'job' : null
+        let sort = route.page === 'new' || route.page === 'jobs' ? 'new' : 'top'
         let data = await apiGet('items', { sort, type, page })
         items = data.items
         listHasMore = data.hasMore
