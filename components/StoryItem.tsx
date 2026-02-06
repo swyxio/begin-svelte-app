@@ -26,11 +26,12 @@ export function StoryItem({ item, rank, userVote, currentUser, showText }: Story
               <td className="story-rank">{rank}.</td>
             )}
             <td className="story-vote-cell">
-              {!isJob && currentUser && currentUser.username !== item.by ? (
+              {!isJob && (!currentUser || currentUser.username !== item.by) ? (
                 <VoteArrows
                   itemId={item.id}
                   currentVote={userVote || null}
                   itemType="story"
+                  isLoggedIn={!!currentUser}
                 />
               ) : (
                 <span className="vote-spacer" />

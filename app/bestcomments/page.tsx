@@ -47,12 +47,13 @@ export default async function BestCommentsPage({ searchParams }: { searchParams:
               <tbody>
                 <tr>
                   <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
-                    {user && user.username !== comment.by ? (
+                    {(!user || user.username !== comment.by) ? (
                       <VoteArrows
                         itemId={comment.id}
                         currentVote={userVotes.get(comment.id) || null}
                         itemType="comment"
                         canDownvote={canDownvote}
+                        isLoggedIn={!!user}
                       />
                     ) : (
                       <span className="vote-spacer" />

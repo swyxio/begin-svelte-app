@@ -44,12 +44,13 @@ export function CommentItem({
           <tbody>
             <tr>
               <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
-                {!isDeleted && currentUser && currentUser.username !== comment.by ? (
+                {!isDeleted && (!currentUser || currentUser.username !== comment.by) ? (
                   <VoteArrows
                     itemId={comment.id}
                     currentVote={userVote}
                     itemType="comment"
                     canDownvote={canDownvote}
+                    isLoggedIn={!!currentUser}
                   />
                 ) : (
                   <span className="vote-spacer" />

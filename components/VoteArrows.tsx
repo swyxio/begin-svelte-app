@@ -7,13 +7,18 @@ interface VoteArrowsProps {
   currentVote: string | null;
   itemType: 'story' | 'comment';
   canDownvote?: boolean;
+  isLoggedIn?: boolean;
 }
 
-export function VoteArrows({ itemId, currentVote, itemType, canDownvote = false }: VoteArrowsProps) {
+export function VoteArrows({ itemId, currentVote, itemType, canDownvote = false, isLoggedIn = true }: VoteArrowsProps) {
   const [vote, setVote] = useState(currentVote);
   const [loading, setLoading] = useState(false);
 
   async function handleVote(direction: 'up' | 'down' | 'un') {
+    if (!isLoggedIn) {
+      window.location.href = `/login?goto=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      return;
+    }
     if (loading) return;
     setLoading(true);
     try {

@@ -73,11 +73,12 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
           <tbody>
             <tr>
               <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
-                {item.type !== 'job' && user && user.username !== item.by ? (
+                {item.type !== 'job' && (!user || user.username !== item.by) ? (
                   <VoteArrows
                     itemId={item.id}
                     currentVote={userVotes.get(item.id) || null}
                     itemType="story"
+                    isLoggedIn={!!user}
                   />
                 ) : (
                   <span className="vote-spacer" />
@@ -196,12 +197,13 @@ async function CommentItemPage({ item, user }: { item: DbItem; user: { userId: n
             <tbody>
               <tr>
                 <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
-                  {user && user.username !== item.by ? (
+                  {(!user || user.username !== item.by) ? (
                     <VoteArrows
                       itemId={item.id}
                       currentVote={userVotes.get(item.id) || null}
                       itemType="comment"
                       canDownvote={canDownvote}
+                      isLoggedIn={!!user}
                     />
                   ) : (
                     <span className="vote-spacer" />
