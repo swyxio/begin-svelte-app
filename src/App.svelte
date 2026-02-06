@@ -386,7 +386,7 @@
         <span class="sep">|</span>
         <a href={`#/hidden?id=${currentUser.username}`}>hidden</a>
         <span class="sep">|</span>
-        <a href="#" on:click|preventDefault={handleLogout}>logout</a>
+        <button type="button" class="link-button" on:click={handleLogout}>logout</button>
       {:else}
         <a href="#/login">login</a>
       {/if}
@@ -408,7 +408,7 @@
             <span class="rank">{(page - 1) * PAGE_SIZE + index + 1}.</span>
             <span class="vote">
               {#if currentUser}
-                <a href="#" on:click|preventDefault={() => handleVote(item)}>{item.voted ? '▲' : '△'}</a>
+                <button type="button" class="link-button" on:click={() => handleVote(item)}>{item.voted ? '▲' : '△'}</button>
               {/if}
             </span>
             <div class="item-main">
@@ -430,11 +430,11 @@
                 <a href={`#/item?id=${item.id}`}>{item.descendants} comments</a>
                 {#if currentUser}
                   <span class="sep">|</span>
-                  <a href="#" on:click|preventDefault={() => handleHide(item)}>{item.hidden ? 'unhide' : 'hide'}</a>
+                  <button type="button" class="link-button" on:click={() => handleHide(item)}>{item.hidden ? 'unhide' : 'hide'}</button>
                   <span class="sep">|</span>
-                  <a href="#" on:click|preventDefault={() => handleFavorite(item)}>{item.favorite ? 'unfavorite' : 'favorite'}</a>
+                  <button type="button" class="link-button" on:click={() => handleFavorite(item)}>{item.favorite ? 'unfavorite' : 'favorite'}</button>
                   <span class="sep">|</span>
-                  <a href="#" on:click|preventDefault={() => handleFlag(item)}>{item.flagged ? 'flagged' : 'flag'}</a>
+                  <button type="button" class="link-button" on:click={() => handleFlag(item)}>{item.flagged ? 'flagged' : 'flag'}</button>
                 {/if}
               </div>
             </div>
@@ -454,7 +454,7 @@
           <div class="comment-snippet">
             <div class="comment-meta">
               {#if currentUser}
-                <a class="vote" href="#" on:click|preventDefault={() => handleVote(comment)}>{comment.voted ? '▲' : '△'}</a>
+                <button type="button" class="link-button vote" on:click={() => handleVote(comment)}>{comment.voted ? '▲' : '△'}</button>
               {/if}
               {comment.score} points by
               <a href={`#/user?id=${comment.by}`}>{comment.by}</a>
@@ -478,7 +478,7 @@
         <div class="item-heading">
           <span class="vote">
             {#if currentUser}
-              <a href="#" on:click|preventDefault={() => handleVote(itemDetail.item)}>{itemDetail.item.voted ? '▲' : '△'}</a>
+              <button type="button" class="link-button" on:click={() => handleVote(itemDetail.item)}>{itemDetail.item.voted ? '▲' : '△'}</button>
             {/if}
           </span>
           <div class="item-main">
@@ -497,16 +497,16 @@
               <a href={`#/user?id=${itemDetail.item.by}`}>{itemDetail.item.by}</a>
               {timeAgo(itemDetail.item.createdAt)}
               <span class="sep">|</span>
-              <a href="#" on:click|preventDefault={() => handleFavorite(itemDetail.item)}>{itemDetail.item.favorite ? 'unfavorite' : 'favorite'}</a>
+              <button type="button" class="link-button" on:click={() => handleFavorite(itemDetail.item)}>{itemDetail.item.favorite ? 'unfavorite' : 'favorite'}</button>
               <span class="sep">|</span>
-              <a href="#" on:click|preventDefault={() => handleHide(itemDetail.item)}>{itemDetail.item.hidden ? 'unhide' : 'hide'}</a>
+              <button type="button" class="link-button" on:click={() => handleHide(itemDetail.item)}>{itemDetail.item.hidden ? 'unhide' : 'hide'}</button>
               <span class="sep">|</span>
-              <a href="#" on:click|preventDefault={() => handleFlag(itemDetail.item)}>{itemDetail.item.flagged ? 'flagged' : 'flag'}</a>
+              <button type="button" class="link-button" on:click={() => handleFlag(itemDetail.item)}>{itemDetail.item.flagged ? 'flagged' : 'flag'}</button>
               {#if itemDetail.item.canEdit}
                 <span class="sep">|</span>
-                <a href="#" on:click|preventDefault={() => showEditForm = !showEditForm}>edit</a>
+                <button type="button" class="link-button" on:click={() => showEditForm = !showEditForm}>edit</button>
                 <span class="sep">|</span>
-                <a href="#" on:click|preventDefault={() => handleDeleteItem(itemDetail.item)}>delete</a>
+                <button type="button" class="link-button" on:click={() => handleDeleteItem(itemDetail.item)}>delete</button>
               {/if}
             </div>
           </div>
@@ -803,6 +803,20 @@
     padding: 0 4px;
   }
 
+  :global(.link-button) {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  :global(.link-button:hover) {
+    text-decoration: underline;
+  }
+
   .content {
     padding: 12px 16px 32px;
   }
@@ -829,7 +843,7 @@
     text-align: right;
   }
 
-  .vote {
+  :global(.vote) {
     width: 16px;
     color: #ff6600;
   }

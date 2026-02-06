@@ -48,7 +48,7 @@
 <div class="comment">
   <div class="comment-header">
     {#if currentUser}
-      <a class="vote" href="#" on:click|preventDefault={() => onVote(comment)}>{comment.voted ? '▲' : '△'}</a>
+      <button type="button" class="link-button vote" on:click={() => onVote(comment)}>{comment.voted ? '▲' : '△'}</button>
     {/if}
     <span class="comment-meta">
       {comment.score} points by
@@ -65,15 +65,15 @@
     {#if currentUser}
       <span class="comment-actions">
         {#if !comment.deleted}
-          <a href="#" on:click|preventDefault={() => showReply = !showReply}>reply</a>
+          <button type="button" class="link-button" on:click={() => showReply = !showReply}>reply</button>
         {/if}
         {#if comment.canEdit}
-          <span> | </span><a href="#" on:click|preventDefault={() => showEdit = !showEdit}>edit</a>
-          <span> | </span><a href="#" on:click|preventDefault={() => onDelete(comment)}>delete</a>
+          <span> | </span><button type="button" class="link-button" on:click={() => showEdit = !showEdit}>edit</button>
+          <span> | </span><button type="button" class="link-button" on:click={() => onDelete(comment)}>delete</button>
         {:else}
-          <span> | </span><a href="#" on:click|preventDefault={() => onFlag(comment)}>{comment.flagged ? 'flagged' : 'flag'}</a>
+          <span> | </span><button type="button" class="link-button" on:click={() => onFlag(comment)}>{comment.flagged ? 'flagged' : 'flag'}</button>
         {/if}
-        <span> | </span><a href="#" on:click|preventDefault={() => onFavorite(comment)}>{comment.favorite ? 'unfavorite' : 'favorite'}</a>
+        <span> | </span><button type="button" class="link-button" on:click={() => onFavorite(comment)}>{comment.favorite ? 'unfavorite' : 'favorite'}</button>
       </span>
     {/if}
   </div>
