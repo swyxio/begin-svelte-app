@@ -21,6 +21,14 @@ export function StoryList({
   basePath = '/',
   moreParams = '',
 }: StoryListProps) {
+  if (items.length === 0) {
+    return (
+      <div className="empty-state">
+        No items to display.
+      </div>
+    );
+  }
+
   return (
     <div className="story-list">
       {items.map((item, index) => (

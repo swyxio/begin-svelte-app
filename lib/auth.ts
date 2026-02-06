@@ -19,7 +19,28 @@ export async function login(username: string, password: string): Promise<{ error
   session.username = user.username;
   await session.save();
 
+  // Set noprocrast cookies if enabled
+  await setNoprocrastCookies(user);
+
   return {};
+}
+
+async function setNoprocrastCookies(user: { noprocrast: number; maxvisit: number; minaway: number }) {
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  
+  if (user.noprocrast) {
+    cookieStore.set('np_enabled', '1', { path: '/', maxAge: 86400 });
+    cookieStore.set('np_start', String(Date.now()), { path: '/', maxAge: 86400 });
+    cookieStore.set('np_maxvisit', String(user.maxvisit), { path: '/', maxAge: 86400 });
+    cookieStore.set('np_minaway', String(user.minaway), { path: '/', maxAge: 86400 });
+  } else {
+    cookieStore.delete('np_enabled');
+    cookieStore.delete('np_start');
+    cookieStore.delete('np_maxvisit');
+    cookieStore.delete('np_minaway');
+    cookieStore.delete('np_locked');
+  }
 }
 
 export async function register(username: string, password: string): Promise<{ error?: string }> {

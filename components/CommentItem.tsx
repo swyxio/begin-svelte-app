@@ -33,6 +33,7 @@ export function CommentItem({
   // Check if comment is within edit window (~2 hours)
   const commentAge = Date.now() - new Date(comment.created_at + 'Z').getTime();
   const canEdit = currentUser?.username === comment.by && commentAge < 2 * 60 * 60 * 1000;
+  const canDelete = currentUser?.username === comment.by && commentAge < 15 * 60 * 1000;
 
   return (
     <div
@@ -105,6 +106,12 @@ export function CommentItem({
                 <>
                   {' | '}
                   <Link href={`/edit?id=${comment.id}`}>edit</Link>
+                </>
+              )}
+              {canDelete && (
+                <>
+                  {' | '}
+                  <a href={`/api/delete?id=${comment.id}&confirm=true`}>delete</a>
                 </>
               )}
             </div>

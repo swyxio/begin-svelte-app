@@ -1,4 +1,4 @@
-import { getStories, getUserVotesForItems } from '@/lib/db';
+import { getStories, getUserVotesForItems, getUserByUsername } from '@/lib/db';
 import { getCurrentUser } from '@/lib/session';
 import { rankStories } from '@/lib/ranking';
 import { StoryList } from '@/components/StoryList';
@@ -9,6 +9,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const page = getPage(params);
   const user = await getCurrentUser();
 
+  // Check showdead setting
+  let showDead = false;
+  if (user) {
+    const dbUser = getUserByUsername(user.username);
+    showDead = dbUser?.showdead === 1;
+  }
+
   // Fetch more stories than needed to apply ranking properly
   const stories = getStories({
     type: undefined, // stories and jobs
@@ -18,7 +25,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   });
 
   // Filter out dead items unless user has showdead enabled
-  const visibleStories = stories.filter(s => s.dead === 0);
+  const visibleStories = showDead ? stories : stories.filter(s => s.dead === 0);
 
   // Rank stories
   const ranked = rankStories(visibleStories);
