@@ -457,11 +457,16 @@
                 <span class="domain">({item.domain})</span>
               {/if}
               <div class="subtext">
-                {item.score} points by
-                <a href={`#/user?id=${item.by}`}>{item.by}</a>
-                {timeAgo(item.createdAt)}
-                <span class="sep">|</span>
-                <a href={`#/item?id=${item.id}`}>{item.descendants} comments</a>
+                {#if item.type === 'job'}
+                  {timeAgo(item.createdAt)} by
+                  <a href={`#/user?id=${item.by}`}>{item.by}</a>
+                {:else}
+                  {item.score} points by
+                  <a href={`#/user?id=${item.by}`}>{item.by}</a>
+                  {timeAgo(item.createdAt)}
+                  <span class="sep">|</span>
+                  <a href={`#/item?id=${item.id}`}>{item.descendants} comments</a>
+                {/if}
                 {#if currentUser}
                   <span class="sep">|</span>
                   <button type="button" class="link-button" on:click={() => handleHide(item)}>{item.hidden ? 'unhide' : 'hide'}</button>
@@ -531,9 +536,14 @@
               <span class="domain">({itemDetail.item.domain})</span>
             {/if}
             <div class="subtext">
-              {itemDetail.item.score} points by
-              <a href={`#/user?id=${itemDetail.item.by}`}>{itemDetail.item.by}</a>
-              {timeAgo(itemDetail.item.createdAt)}
+              {#if itemDetail.item.type === 'job'}
+                {timeAgo(itemDetail.item.createdAt)} by
+                <a href={`#/user?id=${itemDetail.item.by}`}>{itemDetail.item.by}</a>
+              {:else}
+                {itemDetail.item.score} points by
+                <a href={`#/user?id=${itemDetail.item.by}`}>{itemDetail.item.by}</a>
+                {timeAgo(itemDetail.item.createdAt)}
+              {/if}
               <span class="sep">|</span>
               <button type="button" class="link-button" on:click={() => handleFavorite(itemDetail.item)}>{itemDetail.item.favorite ? 'unfavorite' : 'favorite'}</button>
               <span class="sep">|</span>
@@ -579,7 +589,9 @@
           </div>
         {/if}
 
-        {#if currentUser}
+        {#if itemDetail.item.type === 'job'}
+          <div class="comment-box muted">Job posts are not open for comments.</div>
+        {:else if currentUser}
           <div class="comment-box">
             <textarea rows="6" bind:value={commentText}></textarea>
             <button on:click={handleCommentSubmit}>add comment</button>
