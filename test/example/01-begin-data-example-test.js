@@ -20,7 +20,7 @@ test('Start sandbox', async t => {
 })
 
 test('Register author and create item', async t => {
-  t.plan(4)
+  t.plan(6)
   let register = await tiny.post({
     url: `${url}/api`,
     data: { action: 'register', username: 'cathy', password: 'password123' }
@@ -40,6 +40,29 @@ test('Register author and create item', async t => {
   })
   itemId = create.body.item.id
   t.ok(itemId, 'Created ask item')
+
+  let job = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: {
+      action: 'create-item',
+      type: 'job',
+      title: 'Hiring: Frontend Engineer',
+      text: 'Email us.'
+    }
+  })
+  t.ok(job.body.item.id, 'Created job item')
+
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: authorCookie },
+      data: { action: 'create-comment', itemId: job.body.item.id, text: 'Interested.' }
+    })
+    t.fail('Job comment should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 400, 'Job comments rejected')
+  }
 
   await tiny.post({
     url: `${url}/api`,

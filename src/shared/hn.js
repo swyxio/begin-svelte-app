@@ -441,6 +441,12 @@ async function createComment ({ itemId, parentId, text, username }) {
   if (!root) {
     throw createError('Parent item not found.', 404)
   }
+  if (root.type === 'job') {
+    throw createError('Job posts do not accept comments.')
+  }
+  if (root.deleted) {
+    throw createError('Cannot comment on deleted items.')
+  }
 
   let actualParentId = parentId || itemId
   if (parentId) {
@@ -483,6 +489,9 @@ async function voteItem ({ itemId, username }) {
   }
   if (item.deleted) {
     throw createError('Cannot vote on deleted items.')
+  }
+  if (item.type === 'job') {
+    throw createError('Job posts cannot be voted on.')
   }
   if (item.by === username) {
     throw createError('You cannot vote for your own item.')
