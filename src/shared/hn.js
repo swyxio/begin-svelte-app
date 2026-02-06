@@ -299,7 +299,7 @@ async function getUserHidden (username, viewer) {
   let records = await listAll()
   let state = getUserState(records, viewer)
   let hidden = filterByPrefix(records, `${KEY_PREFIXES.hide}${username}:`)
-  let items = records.filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
+  let items = records.filter(record => ITEM_TYPES.includes(record.type))
   let hiddenList = hidden.map(record => {
     let itemId = parseItemId(record)
     let item = items.find(entry => ensureItemId(entry) === itemId)
