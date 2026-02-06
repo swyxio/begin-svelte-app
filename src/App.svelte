@@ -742,9 +742,13 @@
             <li class="item-row compact">
               <span class="rank">•</span>
               <div class="item-main">
-                <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">{item.title}</a>
-                {#if item.domain}
-                  <span class="domain">({item.domain})</span>
+                {#if item.deleted}
+                  <span class="title deleted">[deleted]</span>
+                {:else}
+                  <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">{item.title}</a>
+                  {#if item.domain}
+                    <span class="domain">({item.domain})</span>
+                  {/if}
                 {/if}
                 <div class="subtext">
                   {item.score} points by
@@ -770,9 +774,13 @@
             <li class="item-row compact">
               <span class="rank">•</span>
               <div class="item-main">
-                <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">{item.title}</a>
-                {#if item.domain}
-                  <span class="domain">({item.domain})</span>
+                {#if item.deleted}
+                  <span class="title deleted">[deleted]</span>
+                {:else}
+                  <a class="title" href={itemLink(item)} target={itemLinkTarget(item)} rel="noreferrer">{item.title}</a>
+                  {#if item.domain}
+                    <span class="domain">({item.domain})</span>
+                  {/if}
                 {/if}
                 <div class="subtext">
                   {item.score} points by
