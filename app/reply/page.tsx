@@ -55,7 +55,7 @@ export default async function ReplyPage({ searchParams }: { searchParams: Promis
             </>
           )}
         </div>
-        <div className="comment-body" dangerouslySetInnerHTML={{ __html: item.text || item.title || '' }} />
+        <div className="comment-body" dangerouslySetInnerHTML={{ __html: item.type === 'comment' ? (item.text || '') : (item.text ? formatHnText(item.text) : (item.title || '')) }} />
       </div>
       <form action={handleReply}>
         <textarea name="text" rows={8} cols={80}></textarea>

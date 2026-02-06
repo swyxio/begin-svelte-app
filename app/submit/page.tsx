@@ -21,9 +21,25 @@ export default async function SubmitPage({ searchParams }: { searchParams: Promi
       redirect('/submit?error=' + encodeURIComponent('Please enter a title.'));
     }
 
-    // Can't have both url and text
+    if (title.length > 80) {
+      redirect('/submit?error=' + encodeURIComponent('Titles can be at most 80 characters long.'));
+    }
+
+    // Validate URL format if provided
+    if (url) {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        redirect('/submit?error=' + encodeURIComponent('URLs must begin with http:// or https://'));
+      }
+      try {
+        new URL(url);
+      } catch {
+        redirect('/submit?error=' + encodeURIComponent('Please enter a valid URL.'));
+      }
+    }
+
+    // Can't have both url and text (on HN, text is only for Ask HN / text posts)
     if (url && text) {
-      redirect('/submit?error=' + encodeURIComponent('Submissions can have a url or text, not both. If you want to show a url with your text, just put it in the text field.'));
+      redirect('/submit?error=' + encodeURIComponent('Submissions can\'t have both a url and text. If you want to show a url with your text, just include it in the text.'));
     }
 
     // Check for duplicate URL
@@ -35,7 +51,6 @@ export default async function SubmitPage({ searchParams }: { searchParams: Promi
       }
     }
 
-    // Determine type
     const type = 'story';
 
     const { createItem } = await import('@/lib/db');
@@ -44,7 +59,7 @@ export default async function SubmitPage({ searchParams }: { searchParams: Promi
       by: currentUser.username,
       title,
       url: url || undefined,
-      text: text || undefined,  // Store raw text, format at render time
+      text: text || undefined,
     });
 
     redirect(`/item?id=${itemId}`);
@@ -58,7 +73,7 @@ export default async function SubmitPage({ searchParams }: { searchParams: Promi
           <tbody>
             <tr>
               <td>title</td>
-              <td><input type="text" name="title" size={50} /></td>
+              <td><input type="text" name="title" size={50} maxLength={80} /></td>
             </tr>
             <tr>
               <td>url</td>
