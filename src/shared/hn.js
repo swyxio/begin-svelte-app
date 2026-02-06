@@ -165,7 +165,7 @@ async function registerUser ({ username, password, about }) {
     username,
     passwordHash: hashPassword(password),
     createdAt: nowISO(),
-    karma: 1,
+    karma: 0,
     about: about || ''
   }
   await setRecord(user)
@@ -419,7 +419,7 @@ async function createItem ({ type, title, url, text, username }) {
     text: text || '',
     by: username,
     createdAt: nowISO(),
-    score: 1,
+    score: 0,
     descendants: 0,
     parentId: null,
     rootId: null,

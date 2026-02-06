@@ -95,7 +95,7 @@ test('Vote on story', async t => {
     headers: { cookie: voterCookie },
     data: { action: 'vote', itemId }
   })
-  t.ok(result.body.item.score >= 2, 'Story score incremented')
+  t.ok(result.body.item.score >= 1, 'Story score incremented')
 })
 
 test('Get item detail', async t => {
