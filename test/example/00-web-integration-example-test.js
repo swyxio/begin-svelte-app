@@ -10,6 +10,17 @@ let flaggerCookie
 let itemId
 let commentId
 
+function findComment (comments, id) {
+  for (let comment of comments) {
+    if (comment.id === id) return comment
+    if (comment.children && comment.children.length) {
+      let nested = findComment(comment.children, id)
+      if (nested) return nested
+    }
+  }
+  return null
+}
+
 test('Set up env', t => {
   t.plan(1)
   t.ok(sandbox, 'sandbox loaded')
@@ -322,6 +333,34 @@ test('Get comments listing', async t => {
   let thread = result.body.comments.find(comment => comment.rootId === itemId)
   t.ok(thread, 'Comments listing includes thread')
   t.equal(thread.rootBy, 'alice', 'Comments listing includes root author')
+})
+
+test('Edit and delete comment', async t => {
+  t.plan(4)
+  let edit = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: submitterCookie },
+    data: { action: 'edit-item', itemId: commentId, text: 'Updated comment' }
+  })
+  t.equal(edit.body.item.text, 'Updated comment', 'Comment text updated')
+  let detail = await tiny.get({
+    url: `${url}/api?action=item&id=${itemId}`,
+    headers: { cookie: submitterCookie }
+  })
+  let updated = findComment(detail.body.comments, commentId)
+  t.equal(updated.text, 'Updated comment', 'Item detail shows updated comment')
+  let deleted = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: submitterCookie },
+    data: { action: 'delete-item', itemId: commentId }
+  })
+  t.ok(deleted.body.item.deleted, 'Comment deleted')
+  let detailAfter = await tiny.get({
+    url: `${url}/api?action=item&id=${itemId}`,
+    headers: { cookie: submitterCookie }
+  })
+  let deletedComment = findComment(detailAfter.body.comments, commentId)
+  t.equal(deletedComment.text, '[deleted]', 'Deleted comment masked')
 })
 
 test('Edit and delete item', async t => {
