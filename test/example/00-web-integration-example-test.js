@@ -263,12 +263,14 @@ test('Flag item to hide', async t => {
 })
 
 test('Get comments listing', async t => {
-  t.plan(1)
+  t.plan(2)
   let result = await tiny.get({
     url: `${url}/api?action=comments`,
     headers: { cookie: voterCookie }
   })
-  t.ok(result.body.comments.some(comment => comment.rootId === itemId), 'Comments listing includes thread')
+  let thread = result.body.comments.find(comment => comment.rootId === itemId)
+  t.ok(thread, 'Comments listing includes thread')
+  t.equal(thread.rootBy, 'alice', 'Comments listing includes root author')
 })
 
 test('Shut down sandbox', t => {

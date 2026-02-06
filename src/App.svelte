@@ -522,6 +522,10 @@
               {timeAgo(comment.createdAt)}
               <span class="sep">|</span>
               <a href={`#/item?id=${comment.rootId}`}>{comment.rootTitle || 'link'}</a>
+              {#if comment.rootBy}
+                <span class="sep">|</span>
+                <span>by {comment.rootBy}</span>
+              {/if}
             </div>
             <div class="comment-text">{comment.text}</div>
           </div>
