@@ -20,7 +20,7 @@ test('Start sandbox', async t => {
 })
 
 test('Register author and create item', async t => {
-  t.plan(7)
+  t.plan(10)
   let register = await tiny.post({
     url: `${url}/api`,
     data: { action: 'register', username: 'cathy', password: 'password123' }
@@ -65,6 +65,13 @@ test('Register author and create item', async t => {
     t.equal(err.body.status, 400, 'Error payload includes status')
   }
 
+  let comment = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: { action: 'create-comment', itemId, text: 'Thanks for the responses!' }
+  })
+  t.ok(comment.body.comment.id, 'Profile comment created')
+
   await tiny.post({
     url: `${url}/api`,
     headers: { cookie: authorCookie },
@@ -75,7 +82,10 @@ test('Register author and create item', async t => {
     url: `${url}/api?action=user&username=cathy`,
     headers: { cookie: authorCookie }
   })
+  let profileComment = profile.body.comments.find(entry => entry.rootId === itemId)
   t.ok(profile.body.submissions.length >= 1, 'Profile submissions returned')
+  t.equal(profileComment.rootTitle, 'Ask HN: Favorite tooling?', 'Profile comment root title populated')
+  t.equal(profileComment.rootBy, 'cathy', 'Profile comment root author populated')
   t.equal(profile.body.user.about, 'I love HN.', 'Profile about updated')
 })
 
