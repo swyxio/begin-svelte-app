@@ -438,7 +438,7 @@
             <span class="rank">{(page - 1) * PAGE_SIZE + index + 1}.</span>
             <span class="vote">
               {#if canVote(item)}
-                <button type="button" class="link-button" on:click={() => handleVote(item)}>{item.voted ? '▲' : '△'}</button>
+                <button type="button" class="link-button" on:click={() => handleVote(item)}>▲</button>
               {/if}
             </span>
             <div class="item-main">
@@ -488,7 +488,7 @@
           <div class="comment-snippet">
             <div class="comment-meta">
               {#if canVote(comment)}
-                <button type="button" class="link-button vote" on:click={() => handleVote(comment)}>{comment.voted ? '▲' : '△'}</button>
+                <button type="button" class="link-button vote" on:click={() => handleVote(comment)}>▲</button>
               {/if}
               {comment.score} points by
               <a href={`#/user?id=${comment.by}`}>{comment.by}</a>
@@ -512,7 +512,7 @@
         <div class="item-heading">
           <span class="vote">
             {#if canVote(itemDetail.item)}
-              <button type="button" class="link-button" on:click={() => handleVote(itemDetail.item)}>{itemDetail.item.voted ? '▲' : '△'}</button>
+              <button type="button" class="link-button" on:click={() => handleVote(itemDetail.item)}>▲</button>
             {/if}
           </span>
           <div class="item-main">
