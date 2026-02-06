@@ -10,7 +10,9 @@ const sessionOptions = {
   password: process.env.SESSION_SECRET || 'complex_password_at_least_32_characters_long_hn_clone_2024_secret_key',
   cookieName: 'hn_session',
   cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
+    // Only use secure cookies when explicitly on HTTPS (not just production mode)
+    // This allows the production build to work over HTTP on localhost
+    secure: process.env.COOKIE_SECURE === 'true',
     httpOnly: true,
     sameSite: 'lax' as const,
     maxAge: 60 * 60 * 24 * 30, // 30 days

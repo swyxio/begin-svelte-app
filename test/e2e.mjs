@@ -94,9 +94,16 @@ async function run() {
       page.click('input[value="add comment"]'),
     ]);
     
+    // Wait for the page to fully render after redirect
+    await page.waitForSelector('.comment-body', { timeout: 5000 }).catch(() => {});
+    
     // Check the comment appears
-    const commentBody = await page.$eval('.comment-body', el => el.innerHTML);
-    assert(commentBody.includes('<i>automated</i>'), `Comment has italic formatting: ${commentBody.substring(0, 80)}`);
+    const commentBodies = await page.$$('.comment-body');
+    assert(commentBodies.length > 0, `${commentBodies.length} comment(s) rendered`);
+    if (commentBodies.length > 0) {
+      const commentBody = await page.$eval('.comment-body', el => el.innerHTML);
+      assert(commentBody.includes('<i>automated</i>'), `Comment has italic formatting`);
+    }
 
     // === Test 5: Vote on a story ===
     console.log('\n5. Vote');
@@ -107,7 +114,7 @@ async function run() {
     // Click the first vote arrow (for someone else's story)
     if (voteArrows.length > 0) {
       await voteArrows[0].click();
-      await page.waitForTimeout(1000); // Wait for the async vote
+      await new Promise(r => setTimeout(r, 1500)); // Wait for the async vote
       const votedArrows = await page.$$('.vote-arrow-up.voted');
       assert(votedArrows.length > 0, 'Vote arrow turned orange (voted)');
     }
@@ -160,7 +167,7 @@ async function run() {
     // Click first collapse button
     if (toggleBtns.length > 0) {
       await toggleBtns[0].click();
-      await page.waitForTimeout(500);
+      await new Promise(r => setTimeout(r, 500));
       const afterBodies = await page.$$('.comment-body');
       assert(afterBodies.length < initialCount, `Comments hidden after collapse (${initialCount} → ${afterBodies.length})`);
     }

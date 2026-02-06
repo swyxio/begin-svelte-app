@@ -52,7 +52,7 @@ export async function Header() {
                 {') '}
                 <span className="header-nav-sep">|</span>
                 {' '}
-                <Link href="/logout">logout</Link>
+                <a href="/logout">logout</a>
               </span>
             ) : (
               <Link href="/login">login</Link>
