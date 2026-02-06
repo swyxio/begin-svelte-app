@@ -254,6 +254,21 @@ test('Register flagger', async t => {
   t.ok(flaggerCookie, 'Got flagger session cookie')
 })
 
+test('Cannot vote own story', async t => {
+  t.plan(2)
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: submitterCookie },
+      data: { action: 'vote', itemId }
+    })
+    t.fail('Voting own story should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 400, 'Voting own story rejected')
+    t.equal(err.body.status, 400, 'Voting own story includes status')
+  }
+})
+
 test('Vote on story', async t => {
   t.plan(1)
   let result = await tiny.post({
