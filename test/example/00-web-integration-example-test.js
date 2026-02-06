@@ -6,6 +6,7 @@ let url = 'http://localhost:6666'
 let end
 let submitterCookie
 let voterCookie
+let flaggerCookie
 let itemId
 let commentId
 
@@ -76,6 +77,17 @@ test('Register voter', async t => {
   t.ok(voterCookie, 'Got voter session cookie')
 })
 
+test('Register flagger', async t => {
+  t.plan(2)
+  let result = await tiny.post({
+    url: `${url}/api`,
+    data: { action: 'register', username: 'claire', password: 'password123' }
+  })
+  t.equal(result.body.user.username, 'claire', 'Flagger registered')
+  flaggerCookie = result.headers['set-cookie'][0].split(';')[0]
+  t.ok(flaggerCookie, 'Got flagger session cookie')
+})
+
 test('Vote on story', async t => {
   t.plan(1)
   let result = await tiny.post({
@@ -94,6 +106,30 @@ test('Get item detail', async t => {
   })
   t.equal(result.body.item.id, itemId, 'Loaded item detail')
   t.ok(result.body.comments.length >= 1, 'Loaded comment tree')
+})
+
+test('Flag item to hide', async t => {
+  t.plan(1)
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: flaggerCookie },
+    data: { action: 'flag', itemId }
+  })
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: voterCookie },
+    data: { action: 'flag', itemId }
+  })
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: submitterCookie },
+    data: { action: 'flag', itemId }
+  })
+  let result = await tiny.get({
+    url: `${url}/api?action=item&id=${itemId}`,
+    headers: { cookie: voterCookie }
+  })
+  t.ok(result.body.item.deleted, 'Item flagged and hidden')
 })
 
 test('Get comments listing', async t => {

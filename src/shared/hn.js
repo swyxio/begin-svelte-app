@@ -91,6 +91,9 @@ function serializeItem (item, state, viewer) {
   if (!item) return null
   let id = ensureItemId(item)
   let isOwner = viewer && viewer === item.by
+  let maxScore = item.score || 0
+  let maxFlags = item.flags || 0
+  let commentScore = item.type === 'comment' ? Math.min(maxScore, 20) : maxScore
   return {
     id,
     type: item.type,
@@ -99,7 +102,7 @@ function serializeItem (item, state, viewer) {
     text: item.text || '',
     by: item.by,
     createdAt: item.createdAt,
-    score: item.score || 0,
+    score: commentScore,
     descendants: item.descendants || 0,
     parentId: item.parentId || null,
     rootId: item.rootId || null,
@@ -109,7 +112,7 @@ function serializeItem (item, state, viewer) {
     voted: state.votes.has(id),
     favorite: state.favorites.has(id),
     hidden: state.hidden.has(id),
-    flagged: state.flags.has(id),
+    flagged: state.flags.has(id) || maxFlags >= 3,
     canEdit: Boolean(isOwner && !item.deleted)
   }
 }
@@ -571,6 +574,17 @@ async function flagItem ({ itemId, username, reason }) {
   let item = await getByKey(`${KEY_PREFIXES.item}${itemId}`)
   if (item) {
     item.flags = (item.flags || 0) + 1
+    if (item.flags >= 3) {
+      item.deleted = true
+      item.editedAt = nowISO()
+      if (item.type === 'comment') {
+        item.text = '[flagged]'
+      } else {
+        item.title = '[flagged]'
+        item.text = item.text ? '[flagged]' : ''
+        item.url = ''
+      }
+    }
     await setRecord(item)
   }
 }
