@@ -746,6 +746,10 @@
               {#if comment.rootTitle}
                 <span class="sep">|</span>
                 <a href={`#/item?id=${comment.rootId}`}>{comment.rootTitle}</a>
+                {#if comment.rootBy}
+                  <span class="sep">|</span>
+                  <span>by {comment.rootBy}</span>
+                {/if}
               {/if}
             </div>
             <div class="comment-text">{comment.text}</div>

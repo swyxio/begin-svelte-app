@@ -229,14 +229,15 @@ async function getUserProfile (username, viewer) {
     .filter(record => record.by === username && record.type === 'comment')
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(record => {
-      let serialized = serializeItem(record, state, viewer)
-      if (serialized.rootId) {
-        let root = items.find(item => ensureItemId(item) === serialized.rootId)
-        if (root) {
-          serialized.rootTitle = root.title
-        }
+    let serialized = serializeItem(record, state, viewer)
+    if (serialized.rootId) {
+      let root = items.find(item => ensureItemId(item) === serialized.rootId)
+      if (root) {
+        serialized.rootTitle = root.title
+        serialized.rootBy = root.by
       }
-      return serialized
+    }
+    return serialized
     })
 
   return {
