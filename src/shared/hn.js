@@ -110,7 +110,7 @@ function serializeItem (item, state, viewer) {
     favorite: state.favorites.has(id),
     hidden: state.hidden.has(id),
     flagged: state.flags.has(id),
-    canEdit: Boolean(isOwner)
+    canEdit: Boolean(isOwner && !item.deleted)
   }
 }
 
@@ -463,6 +463,9 @@ async function voteItem ({ itemId, username }) {
   if (!item) {
     throw createError('Item not found.', 404)
   }
+  if (item.deleted) {
+    throw createError('Cannot vote on deleted items.')
+  }
   if (item.by === username) {
     throw createError('You cannot vote for your own item.')
   }
@@ -582,6 +585,9 @@ async function editItem ({ itemId, username, title, url, text }) {
   }
   if (item.by !== username) {
     throw createError('You can only edit your own items.', 403)
+  }
+  if (item.deleted) {
+    throw createError('Cannot edit a deleted item.', 403)
   }
 
   if (item.type === 'comment') {
