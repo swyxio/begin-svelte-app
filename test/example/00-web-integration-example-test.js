@@ -57,6 +57,28 @@ test('Missing favorites username returns status', async t => {
   }
 })
 
+test('Missing POST action returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.post({ url: `${url}/api`, data: {} })
+    t.fail('Missing action should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 400, 'Missing POST action returns 400')
+    t.equal(err.body.status, 400, 'Missing POST action includes status')
+  }
+})
+
+test('Unknown POST action returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.post({ url: `${url}/api`, data: { action: 'unknown' } })
+    t.fail('Unknown action should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 404, 'Unknown POST action returns 404')
+    t.equal(err.body.status, 404, 'Unknown POST action includes status')
+  }
+})
+
 test('Register submitter', async t => {
   t.plan(2)
   let result = await tiny.post({
