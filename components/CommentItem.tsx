@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 import Link from 'next/link';
 import { DbItem } from '@/lib/db';
 import { timeAgo } from '@/lib/utils';
@@ -15,6 +15,7 @@ interface CommentItemProps {
   showContext?: boolean;
   storyTitle?: string;
   showDead?: boolean;
+  children?: ReactNode;
 }
 
 export function CommentItem({
@@ -26,16 +27,15 @@ export function CommentItem({
   showContext = false,
   storyTitle,
   showDead = false,
+  children,
 }: CommentItemProps) {
   const [collapsed, setCollapsed] = useState(false);
   const isDead = comment.dead === 1;
   const isDeleted = comment.deleted === 1;
   const indent = depth * 40;
 
-  // Don't render dead items unless showDead is on
   if (isDead && !showDead && !currentUser) return null;
 
-  // Check time-based capabilities
   const commentAge = Date.now() - new Date(comment.created_at + 'Z').getTime();
   const canEdit = currentUser?.username === comment.by && commentAge < 2 * 60 * 60 * 1000;
   const canDelete = currentUser?.username === comment.by && commentAge < 15 * 60 * 1000;
@@ -43,7 +43,7 @@ export function CommentItem({
 
   return (
     <div
-      className={`comment-item ${collapsed ? 'comment-collapsed' : ''} ${isDead ? 'comment-dead' : ''}`}
+      className={`comment-item ${isDead ? 'comment-dead' : ''}`}
       style={{ marginLeft: `${indent}px` }}
     >
       <div className="comment-head">
@@ -119,6 +119,7 @@ export function CommentItem({
               )}
             </div>
           )}
+          {children}
         </>
       )}
     </div>

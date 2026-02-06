@@ -24,18 +24,17 @@ export function CommentTree({
     <div className="comment-tree">
       {comments.map((comment) => {
         const children = allComments.get(comment.id) || [];
-        // Skip dead comments unless showDead is enabled
         if (comment.dead === 1 && !showDead) return null;
         return (
-          <div key={comment.id}>
-            <CommentItem
-              comment={comment}
-              depth={depth}
-              userVote={userVotes.get(comment.id) || null}
-              currentUser={currentUser}
-              canDownvote={canDownvote}
-              showDead={showDead}
-            />
+          <CommentItem
+            key={comment.id}
+            comment={comment}
+            depth={depth}
+            userVote={userVotes.get(comment.id) || null}
+            currentUser={currentUser}
+            canDownvote={canDownvote}
+            showDead={showDead}
+          >
             {children.length > 0 && (
               <CommentTree
                 comments={children}
@@ -47,7 +46,7 @@ export function CommentTree({
                 showDead={showDead}
               />
             )}
-          </div>
+          </CommentItem>
         );
       })}
     </div>
