@@ -129,6 +129,42 @@ test('Missing threads username returns status', async t => {
   }
 })
 
+test('Unknown item returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api?action=item&id=missing`, buffer: true })
+    t.fail('Missing item should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 404, 'Missing item returns 404')
+    t.equal(body.status, 404, 'Missing item includes status')
+  }
+})
+
+test('Unknown user returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api?action=user&username=missing`, buffer: true })
+    t.fail('Missing user should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 404, 'Missing user returns 404')
+    t.equal(body.status, 404, 'Missing user includes status')
+  }
+})
+
+test('Unknown threads user returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api?action=threads&username=missing`, buffer: true })
+    t.fail('Missing user should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 404, 'Missing user returns 404')
+    t.equal(body.status, 404, 'Missing user includes status')
+  }
+})
+
 test('Missing POST action returns status', async t => {
   t.plan(2)
   try {
