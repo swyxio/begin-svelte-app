@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",
-    "start": "next start --port 3000"
+    "start": "next start --port 3000",
+    "seed": "node scripts/seed.mjs",
+    "test:e2e": "node test/e2e.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

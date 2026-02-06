@@ -75,16 +75,27 @@ With penalties for text-only posts and flagged content.
 
 ```bash
 npm install
-npm run dev
+npm run seed    # Populate with sample data (12 users, 26 stories, 21 comments)
+npm run dev     # Start dev server at http://localhost:3000
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-The SQLite database is auto-created on first request in `data/hn.db`.
+All seed users have password `password`. Try logging in as `pg`, `dang`, `tptacek`, `patio11`, etc.
+
+The SQLite database is auto-created in `data/hn.db`.
 
 ## Production Build
 
 ```bash
 npm run build
 npm start
+```
+
+## Testing
+
+```bash
+# End-to-end browser tests (requires server running)
+npm run build && npm start &
+npm run test:e2e
 ```
