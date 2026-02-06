@@ -209,6 +209,10 @@
     await loadRouteData()
   }
 
+  async function refreshDataOnly () {
+    await loadRouteData()
+  }
+
   async function handleAuthSubmit () {
     authError = ''
     try {
@@ -266,7 +270,7 @@
       } else {
         await apiPost('vote', { itemId: item.id })
       }
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
@@ -279,7 +283,7 @@
       } else {
         await apiPost('favorite', { itemId: item.id })
       }
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
@@ -292,7 +296,7 @@
       } else {
         await apiPost('hide', { itemId: item.id })
       }
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
@@ -301,7 +305,7 @@
   async function handleFlag (item) {
     try {
       await apiPost('flag', { itemId: item.id })
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
@@ -317,7 +321,7 @@
         text: editText
       })
       showEditForm = false
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
@@ -327,7 +331,7 @@
     try {
       deleteError = ''
       await apiPost('delete-item', { itemId: item.id })
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       deleteError = err.message
     }
@@ -341,7 +345,7 @@
         parentId: comment.id,
         text
       })
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
@@ -350,7 +354,7 @@
   async function handleEditComment (comment, text) {
     try {
       await apiPost('edit-item', { itemId: comment.id, text })
-      await refresh()
+      await refreshDataOnly()
     } catch (err) {
       error = err.message
     }
