@@ -280,6 +280,36 @@ test('Cannot vote own story', async t => {
   }
 })
 
+test('Cannot edit others items', async t => {
+  t.plan(2)
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: voterCookie },
+      data: { action: 'edit-item', itemId, title: 'Nope' }
+    })
+    t.fail('Editing others item should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 403, 'Editing others item rejected')
+    t.equal(err.body.status, 403, 'Editing others item includes status')
+  }
+})
+
+test('Cannot delete others items', async t => {
+  t.plan(2)
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: voterCookie },
+      data: { action: 'delete-item', itemId }
+    })
+    t.fail('Deleting others item should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 403, 'Deleting others item rejected')
+    t.equal(err.body.status, 403, 'Deleting others item includes status')
+  }
+})
+
 test('Vote on story', async t => {
   t.plan(1)
   let result = await tiny.post({
