@@ -47,7 +47,7 @@
 
 <div class="comment">
   <div class="comment-header">
-    {#if currentUser}
+    {#if currentUser && comment.by && currentUser.username !== comment.by && !comment.deleted}
       <button type="button" class="link-button vote" on:click={() => onVote(comment)}>{comment.voted ? '▲' : '△'}</button>
     {/if}
     <span class="comment-meta">

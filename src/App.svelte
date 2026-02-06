@@ -101,6 +101,10 @@
     return item.url && item.type !== 'ask' ? '_blank' : null
   }
 
+  function canVote (item) {
+    return currentUser && item && item.by && item.by !== currentUser.username && !item.deleted
+  }
+
   async function apiGet (action, params = {}) {
     let search = new URLSearchParams({ action })
     Object.entries(params).forEach(([key, value]) => {
@@ -433,7 +437,7 @@
           <li class="item-row">
             <span class="rank">{(page - 1) * PAGE_SIZE + index + 1}.</span>
             <span class="vote">
-              {#if currentUser}
+              {#if canVote(item)}
                 <button type="button" class="link-button" on:click={() => handleVote(item)}>{item.voted ? '▲' : '△'}</button>
               {/if}
             </span>
@@ -479,7 +483,7 @@
         {#each commentList as comment}
           <div class="comment-snippet">
             <div class="comment-meta">
-              {#if currentUser}
+              {#if canVote(comment)}
                 <button type="button" class="link-button vote" on:click={() => handleVote(comment)}>{comment.voted ? '▲' : '△'}</button>
               {/if}
               {comment.score} points by
@@ -503,7 +507,7 @@
       <section class="item-detail">
         <div class="item-heading">
           <span class="vote">
-            {#if currentUser}
+            {#if canVote(itemDetail.item)}
               <button type="button" class="link-button" on:click={() => handleVote(itemDetail.item)}>{itemDetail.item.voted ? '▲' : '△'}</button>
             {/if}
           </span>
