@@ -19,15 +19,19 @@ function jsonResponse (statusCode, payload, headers = {}) {
 }
 
 function parseBody (req) {
-  if (!req.body) return {}
-  if (typeof req.body === 'string') {
+  let body = req.body || req.rawBody
+  if (!body) return {}
+  if (Buffer.isBuffer(body)) {
+    body = body.toString()
+  }
+  if (typeof body === 'string') {
     try {
-      return JSON.parse(req.body)
+      return JSON.parse(body)
     } catch (error) {
       return {}
     }
   }
-  return req.body
+  return body
 }
 
 exports.handler = async function http (req) {
