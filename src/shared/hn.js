@@ -33,7 +33,8 @@ function rankScore (item) {
   let points = item.score || 0
   let createdAt = new Date(item.createdAt).getTime()
   let ageHours = Math.max(0, (Date.now() - createdAt) / 3600000)
-  return (points - 1) / Math.pow(ageHours + 2, 1.8)
+  let effectivePoints = Math.max(points, 1) - 1
+  return effectivePoints / Math.pow(ageHours + 2, 1.8)
 }
 
 function sanitizeUser (user) {
