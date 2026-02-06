@@ -1,0 +1,125 @@
+<script>
+  export let comment
+  export let currentUser
+  export let timeAgo
+  export let onReply
+  export let onVote
+  export let onFavorite
+  export let onFlag
+  export let onEdit
+  export let onDelete
+
+  let showReply = false
+  let replyText = ''
+  let showEdit = false
+  let editText = ''
+
+  $: if (comment && !showEdit) {
+    editText = comment.text || ''
+  }
+
+  $: renderedText = comment && comment.text
+    ? escapeHtml(comment.text).replace(/\n/g, '<br>')
+    : ''
+
+  function escapeHtml (value) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
+
+  function submitReply () {
+    if (!replyText.trim()) return
+    onReply(comment, replyText)
+    replyText = ''
+    showReply = false
+  }
+
+  function submitEdit () {
+    if (!editText.trim()) return
+    onEdit(comment, editText)
+    showEdit = false
+  }
+</script>
+
+<div class="comment">
+  <div class="comment-header">
+    {#if currentUser && comment.by && currentUser.username !== comment.by && !comment.deleted}
+      <button type="button" class="link-button vote" on:click={() => onVote(comment)}>{comment.voted ? '▲' : '△'}</button>
+    {/if}
+    <span class="comment-meta">
+      {comment.score} points by
+      {#if comment.by}
+        <a href={`#/user?id=${comment.by}`}>{comment.by}</a>
+      {:else}
+        <span>unknown</span>
+      {/if}
+      {timeAgo(comment.createdAt)}
+      {#if comment.editedAt}
+        <span class="edited"> | edited</span>
+      {/if}
+    </span>
+    {#if currentUser}
+      <span class="comment-actions">
+        {#if !comment.deleted}
+          <button type="button" class="link-button" on:click={() => showReply = !showReply}>reply</button>
+        {/if}
+        {#if comment.canEdit}
+          <span> | </span><button type="button" class="link-button" on:click={() => showEdit = !showEdit}>edit</button>
+          <span> | </span><button type="button" class="link-button" on:click={() => onDelete(comment)}>delete</button>
+        {:else}
+          <span> | </span>
+          {#if comment.flagged}
+            <span>flagged</span>
+          {:else}
+            <button type="button" class="link-button" on:click={() => onFlag(comment)}>flag</button>
+          {/if}
+        {/if}
+        <span> | </span><button type="button" class="link-button" on:click={() => onFavorite(comment)}>{comment.favorite ? 'unfavorite' : 'favorite'}</button>
+      </span>
+    {/if}
+  </div>
+
+  <div class="comment-text">
+    {#if comment.deleted}
+      <span class="deleted">{comment.text || '[deleted]'}</span>
+    {:else}
+      {@html renderedText}
+    {/if}
+  </div>
+
+  {#if showReply}
+    <div class="comment-form">
+      <textarea rows="4" bind:value={replyText}></textarea>
+      <button on:click={submitReply}>reply</button>
+    </div>
+  {/if}
+
+  {#if showEdit}
+    <div class="comment-form">
+      <textarea rows="4" bind:value={editText}></textarea>
+      <button on:click={submitEdit}>save</button>
+    </div>
+  {/if}
+
+  {#if comment.children && comment.children.length}
+    <div class="comment-children">
+      {#each comment.children as child}
+        <svelte:self
+          comment={child}
+          currentUser={currentUser}
+          timeAgo={timeAgo}
+          onReply={onReply}
+          onVote={onVote}
+          onFavorite={onFavorite}
+          onFlag={onFlag}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      {/each}
+    </div>
+  {/if}
+</div>

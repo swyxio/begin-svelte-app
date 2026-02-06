@@ -5,8 +5,7 @@ nature-l3r
 
 @http
 get /api
-get /potato/monkey
-get /foo/bar/:baz
+post /api
 
 @tables
 data

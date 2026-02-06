@@ -1,125 +1,192 @@
 let test = require('tape')
-let data = require('@begin/data')
+let tiny = require('tiny-json-http')
 let sandbox = require('@architect/sandbox')
-let logJSON = i => console.log(JSON.stringify(i,null,2))
 
-/**
- * Begin Data test
- * - Demonstrates basic usage of Begin Data, a fast, free, durable, wide-column persistence store already built into your app
- */
+let url = 'http://localhost:6666'
+let end
+let authorCookie
+let readerCookie
+let itemId
+let jobId
+
 test('Set up env', t => {
-  t.plan(4)
-  t.ok(data, 'Begin Data loaded')
-  t.ok(data.get, 'data.get ready')
-  t.ok(data.set, 'data.set ready')
-  t.ok(data.destroy, 'data.destroy ready')
+  t.plan(1)
+  t.ok(sandbox, 'sandbox loaded')
 })
 
-let end // Saves a reference to be used later to shut down the sandbox
-test('Start sandbox', async t=> {
+test('Start sandbox', async t => {
   t.plan(1)
   end = await sandbox.start()
   t.ok(end, 'Sandbox started!')
 })
 
-test('data.set (one document)', async t => {
-  t.plan(1)
-  let result = await data.set({
-    table: 'tasks',
-    key: 'task1'
+test('Register author and create item', async t => {
+  t.plan(10)
+  let register = await tiny.post({
+    url: `${url}/api`,
+    data: { action: 'register', username: 'cathy', password: 'password123' }
   })
-  t.ok(result.key === 'task1', 'Wrote document')
-  logJSON(result,null,2)
-})
+  authorCookie = register.headers['set-cookie'][0].split(';')[0]
+  t.ok(authorCookie, 'Author session ready')
 
-test('data.get (one document)', async t => {
-  t.plan(1)
-  let task = await data.get({
-    table: 'tasks',
-    key: 'task1'
+  let create = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: {
+      action: 'create-item',
+      type: 'ask',
+      title: 'Ask HN: Favorite tooling?',
+      text: 'What do you use daily?'
+    }
   })
-  t.ok(task.key === 'task1', 'Read document')
-  logJSON(task,null,2)
-})
+  itemId = create.body.item.id
+  t.ok(itemId, 'Created ask item')
 
-test('data.destroy (one document)', async t => {
-  t.plan(1)
-  let result = await data.destroy({
-    table: 'tasks',
-    key: 'task1'
+  let job = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: {
+      action: 'create-item',
+      type: 'job',
+      title: 'Hiring: Frontend Engineer',
+      text: 'Email us.'
+    }
   })
-  t.ok(result, 'Deleted document')
-  logJSON(result,null,2)
-})
+  jobId = job.body.item.id
+  t.ok(jobId, 'Created job item')
 
-/**
- * If no key is supplied, one is created automatically
- */
-test('data.set generates a unique key', async t => {
-  t.plan(1)
-  let result = await data.set({
-    table: 'tasks'
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: authorCookie },
+      data: { action: 'create-comment', itemId: job.body.item.id, text: 'Interested.' }
+    })
+    t.fail('Job comment should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 400, 'Job comments rejected')
+    t.equal(err.body.status, 400, 'Error payload includes status')
+  }
+
+  let comment = await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: { action: 'create-comment', itemId, text: 'Thanks for the responses!' }
   })
-  t.ok(result.key, 'Saved document has a key')
-  logJSON(result,null,2)
-})
+  t.ok(comment.body.comment.id, 'Profile comment created')
 
-/**
- * Any (meta)data is allowed
- */
-test('data.set allows for any JSON document; only table and key are reserved', async t => {
-  t.plan(1)
-  let result = await data.set({
-    table: 'tasks',
-    message: 'hello world',
-    complete: false,
-    timeframe: new Date(Date.now()).toISOString()
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: authorCookie },
+    data: { action: 'update-profile', about: 'I love HN.' }
   })
-  t.ok(Object.getOwnPropertyNames(result.key).length > 2, 'Saved document has multiple properties')
-  logJSON(result,null,2)
-})
 
-/**
- * Save a batch of documents by passing an array
- */
-test('data.set accepts an array to batch save documents', async t => {
-  t.plan(1)
-  let result = await data.set([{
-    table: 'tasks',
-    message: 'catch sunshine every day',
-    complete: true,
-    timeframe: new Date(Date.now()).toISOString()
-  },
-  {
-    table: 'tasks',
-    message: 'leave the phone at home on accident purpose',
-    complete: false,
-    timeframe: new Date(Date.now()).toISOString()
-  },
-  {
-    table: 'tasks',
-    message: 'walk the seawall',
-    complete: false,
-    timeframe: new Date(Date.now()).toISOString()
-
-  }])
-  t.equal(result.length, 3, 'Saved document batch')
-  logJSON(result,null,2)
-})
-
-/**
- * Scan a table
- */
-test('data.get can read an entire table', async t => {
-  t.plan(1)
-  let result = await data.get({
-    table: 'tasks'
+  let profile = await tiny.get({
+    url: `${url}/api?action=user&username=cathy`,
+    headers: { cookie: authorCookie }
   })
-  t.ok(result.length > 1, 'Got docs')
-  logJSON(result,null,2)
+  let profileComment = profile.body.comments.find(entry => entry.rootId === itemId)
+  t.ok(profile.body.submissions.length >= 1, 'Profile submissions returned')
+  t.equal(profileComment.rootTitle, 'Ask HN: Favorite tooling?', 'Profile comment root title populated')
+  t.equal(profileComment.rootBy, 'cathy', 'Profile comment root author populated')
+  t.equal(profile.body.user.about, 'I love HN.', 'Profile about updated')
 })
 
-test('Shut down sandbox', async t=> {
+test('Register reader and favorite/hide', async t => {
+  t.plan(6)
+  let register = await tiny.post({
+    url: `${url}/api`,
+    data: { action: 'register', username: 'dave', password: 'password123' }
+  })
+  readerCookie = register.headers['set-cookie'][0].split(';')[0]
+  t.ok(readerCookie, 'Reader session ready')
+
+  try {
+    await tiny.post({
+      url: `${url}/api`,
+      headers: { cookie: readerCookie },
+      data: { action: 'vote', itemId: jobId }
+    })
+    t.fail('Job votes should fail')
+  } catch (err) {
+    t.equal(err.statusCode, 400, 'Job votes rejected')
+    t.equal(err.body.status, 400, 'Job vote includes status')
+  }
+
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'favorite', itemId }
+  })
+  t.ok(true, 'Favorited item')
+
+  let favorites = await tiny.get({
+    url: `${url}/api?action=favorites&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(favorites.body.items.length >= 1, 'Favorites returned')
+
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'hide', itemId }
+  })
+  let hiddenForReader = await tiny.get({
+    url: `${url}/api?action=items&sort=top`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(!hiddenForReader.body.items.some(item => item.id === itemId), 'Hidden item removed from list')
+})
+
+test('Hidden list and threads', async t => {
+  t.plan(3)
+  let hidden = await tiny.get({
+    url: `${url}/api?action=hidden&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(hidden.body.items.some(item => item.id === itemId), 'Hidden list contains item')
+
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'create-comment', itemId, text: 'Thanks for the question!' }
+  })
+
+  let threads = await tiny.get({
+    url: `${url}/api?action=threads&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(threads.body.comments.length >= 1, 'Threads returned')
+  let threadComment = threads.body.comments.find(comment => comment.rootId === itemId)
+  t.equal(threadComment.rootBy, 'cathy', 'Threads include root author')
+})
+
+test('Remove favorite and hidden', async t => {
+  t.plan(2)
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'unfavorite', itemId }
+  })
+  await tiny.post({
+    url: `${url}/api`,
+    headers: { cookie: readerCookie },
+    data: { action: 'unhide', itemId }
+  })
+
+  let favorites = await tiny.get({
+    url: `${url}/api?action=favorites&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(!favorites.body.items.some(item => item.id === itemId), 'Unfavorite removed item')
+
+  let hidden = await tiny.get({
+    url: `${url}/api?action=hidden&username=dave`,
+    headers: { cookie: readerCookie }
+  })
+  t.ok(!hidden.body.items.some(item => item.id === itemId), 'Unhide removed item')
+})
+
+test('Shut down sandbox', t => {
   t.plan(1)
   end()
   t.ok(true, 'shutdown')
