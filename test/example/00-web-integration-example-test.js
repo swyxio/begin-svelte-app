@@ -57,6 +57,18 @@ test('Missing favorites username returns status', async t => {
   }
 })
 
+test('Missing hidden username returns status', async t => {
+  t.plan(2)
+  try {
+    await tiny.get({ url: `${url}/api?action=hidden`, buffer: true })
+    t.fail('Missing username should fail')
+  } catch (err) {
+    let body = JSON.parse(err.body)
+    t.equal(err.statusCode, 400, 'Missing username returns 400')
+    t.equal(body.status, 400, 'Missing username includes status')
+  }
+})
+
 test('Missing POST action returns status', async t => {
   t.plan(2)
   try {
