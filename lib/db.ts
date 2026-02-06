@@ -34,7 +34,7 @@ function initializeDatabase(db: Database.Database) {
 
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT NOT NULL CHECK(type IN ('story', 'comment', 'job')),
+      type TEXT NOT NULL CHECK(type IN ('story', 'comment', 'job', 'poll', 'pollopt')),
       by TEXT NOT NULL,
       title TEXT,
       url TEXT,
@@ -163,7 +163,7 @@ export function getStories(options: { type?: string; titlePrefix?: string; order
     conditions.push('i.type = ?');
     params.push(options.type);
   } else {
-    conditions.push("i.type IN ('story', 'job')");
+    conditions.push("i.type IN ('story', 'job', 'poll')");
   }
 
   if (options.titlePrefix) {
@@ -247,6 +247,13 @@ export function getChildComments(parentId: number) {
   return db.prepare(
     "SELECT * FROM items WHERE parent_id = ? AND type = 'comment' AND deleted = 0 ORDER BY score DESC, created_at ASC"
   ).all(parentId) as DbItem[];
+}
+
+export function getPollOptions(pollId: number) {
+  const db = getDb();
+  return db.prepare(
+    "SELECT * FROM items WHERE parent_id = ? AND type = 'pollopt' AND deleted = 0 ORDER BY score DESC"
+  ).all(pollId) as DbItem[];
 }
 
 export function updateItemScore(itemId: number, delta: number) {

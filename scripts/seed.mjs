@@ -44,7 +44,7 @@ db.exec(`
   );
   CREATE TABLE IF NOT EXISTS items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT NOT NULL CHECK(type IN ('story', 'comment', 'job')),
+    type TEXT NOT NULL CHECK(type IN ('story', 'comment', 'job', 'poll', 'pollopt')),
     by TEXT NOT NULL,
     title TEXT,
     url TEXT,
@@ -220,6 +220,27 @@ for (const voter of Object.keys(userMap)) {
   }
 }
 console.log('Created votes');
+
+// ─── Poll ────────────────────────────────────────────
+const pollResult = db.prepare(
+  'INSERT INTO items (type, by, title, text, score, descendants, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+).run('poll', 'pg', 'Poll: What is your favorite programming language in 2026?', 'Vote for your favorite language below.', 89, 0, ts(4 * hour));
+const pollId = pollResult.lastInsertRowid;
+
+const pollOptions = [
+  { title: 'Rust', score: 34 },
+  { title: 'Python', score: 28 },
+  { title: 'TypeScript', score: 22 },
+  { title: 'Go', score: 15 },
+  { title: 'Zig', score: 8 },
+];
+
+for (const opt of pollOptions) {
+  db.prepare(
+    'INSERT INTO items (type, by, title, parent_id, score, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run('pollopt', 'pg', opt.title, Number(pollId), opt.score, ts(4 * hour));
+}
+console.log('Created poll with', pollOptions.length, 'options');
 
 // ─── Summary ─────────────────────────────────────────
 const totalUsers = db.prepare('SELECT COUNT(*) as c FROM users').get();

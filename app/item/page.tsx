@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getItemById, getCommentsByStory, getUserVotesForItems, getUserByUsername, DbItem } from '@/lib/db';
+import { getItemById, getCommentsByStory, getUserVotesForItems, getUserByUsername, getPollOptions, DbItem } from '@/lib/db';
 import { getCurrentUser } from '@/lib/session';
 import { extractDomain, timeAgo } from '@/lib/utils';
 import { formatHnText } from '@/lib/format';
@@ -108,6 +108,9 @@ export default async function ItemPage({ searchParams }: { searchParams: Promise
       </div>
       {formattedText && (
         <div className="item-text" dangerouslySetInnerHTML={{ __html: formattedText }} />
+      )}
+      {item.type === 'poll' && (
+        <PollOptions pollId={item.id} userId={user?.userId} />
       )}
       {user && item.type !== 'job' && (
         <div className="comment-form">
@@ -225,6 +228,55 @@ async function CommentItemPage({ item, user }: { item: DbItem; user: { userId: n
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+async function PollOptions({ pollId, userId }: { pollId: number; userId?: number }) {
+  const options = getPollOptions(pollId);
+  if (options.length === 0) return null;
+
+  const totalPoints = options.reduce((sum, o) => sum + o.score, 0);
+  const userVotes = new Map<number, string>();
+  if (userId) {
+    const votes = getUserVotesForItems(userId, options.map(o => o.id));
+    for (const v of votes) {
+      userVotes.set(v.item_id, v.direction);
+    }
+  }
+
+  return (
+    <div style={{ padding: '10px 0' }}>
+      <table style={{ borderSpacing: '4px' }}>
+        <tbody>
+          {options.map((option) => {
+            const voted = userVotes.get(option.id) === 'up';
+            const pct = totalPoints > 0 ? Math.round((option.score / totalPoints) * 100) : 0;
+            return (
+              <tr key={option.id}>
+                <td style={{ verticalAlign: 'top', paddingRight: '4px' }}>
+                  {userId && !voted ? (
+                    <VoteArrows itemId={option.id} currentVote={null} itemType="story" isLoggedIn={true} />
+                  ) : voted ? (
+                    <span style={{ color: '#ff6600', fontSize: '10pt' }}>*</span>
+                  ) : (
+                    <span className="vote-spacer" />
+                  )}
+                </td>
+                <td style={{ fontSize: '10pt' }}>
+                  {option.title}
+                </td>
+                <td style={{ fontSize: '8pt', color: '#828282', paddingLeft: '8px' }}>
+                  {option.score} point{option.score !== 1 ? 's' : ''} ({pct}%)
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={{ fontSize: '8pt', color: '#828282', paddingTop: '4px' }}>
+        {totalPoints} point{totalPoints !== 1 ? 's' : ''} total
+      </div>
     </div>
   );
 }
