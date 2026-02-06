@@ -75,6 +75,8 @@ export function StoryItem({ item, rank, userVote, currentUser, showText }: Story
                       )}
                       <a href={`/api/hide?id=${item.id}`}>hide</a>
                       {' | '}
+                      <a href={`/api/fave?id=${item.id}`}>favorite</a>
+                      {' | '}
                     </>
                   )}
                   <Link href={`/item?id=${item.id}`}>
