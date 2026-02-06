@@ -464,7 +464,11 @@
                   <span class="sep">|</span>
                   <button type="button" class="link-button" on:click={() => handleFavorite(item)}>{item.favorite ? 'unfavorite' : 'favorite'}</button>
                   <span class="sep">|</span>
-                  <button type="button" class="link-button" on:click={() => handleFlag(item)}>{item.flagged ? 'flagged' : 'flag'}</button>
+                  {#if item.flagged}
+                    <span>flagged</span>
+                  {:else}
+                    <button type="button" class="link-button" on:click={() => handleFlag(item)}>flag</button>
+                  {/if}
                 {/if}
               </div>
             </div>
@@ -531,7 +535,11 @@
               <span class="sep">|</span>
               <button type="button" class="link-button" on:click={() => handleHide(itemDetail.item)}>{itemDetail.item.hidden ? 'unhide' : 'hide'}</button>
               <span class="sep">|</span>
-              <button type="button" class="link-button" on:click={() => handleFlag(itemDetail.item)}>{itemDetail.item.flagged ? 'flagged' : 'flag'}</button>
+              {#if itemDetail.item.flagged}
+                <span>flagged</span>
+              {:else}
+                <button type="button" class="link-button" on:click={() => handleFlag(itemDetail.item)}>flag</button>
+              {/if}
               {#if itemDetail.item.canEdit}
                 <span class="sep">|</span>
                 <button type="button" class="link-button" on:click={() => showEditForm = !showEditForm}>edit</button>

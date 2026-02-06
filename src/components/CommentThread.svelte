@@ -71,7 +71,12 @@
           <span> | </span><button type="button" class="link-button" on:click={() => showEdit = !showEdit}>edit</button>
           <span> | </span><button type="button" class="link-button" on:click={() => onDelete(comment)}>delete</button>
         {:else}
-          <span> | </span><button type="button" class="link-button" on:click={() => onFlag(comment)}>{comment.flagged ? 'flagged' : 'flag'}</button>
+          <span> | </span>
+          {#if comment.flagged}
+            <span>flagged</span>
+          {:else}
+            <button type="button" class="link-button" on:click={() => onFlag(comment)}>flag</button>
+          {/if}
         {/if}
         <span> | </span><button type="button" class="link-button" on:click={() => onFavorite(comment)}>{comment.favorite ? 'unfavorite' : 'favorite'}</button>
       </span>
