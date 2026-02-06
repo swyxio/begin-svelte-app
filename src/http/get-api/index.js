@@ -51,16 +51,25 @@ exports.handler = async function http (req) {
 
     if (action === 'item') {
       let id = query.id
+      if (!id) {
+        return jsonResponse(400, { error: 'Missing item id.', status: 400 })
+      }
       let data = await hn.getItemDetail({ id, username })
       return jsonResponse(200, data)
     }
 
     if (action === 'user') {
+      if (!query.username) {
+        return jsonResponse(400, { error: 'Missing username.', status: 400 })
+      }
       let data = await hn.getUserProfile(query.username, username)
       return jsonResponse(200, data)
     }
 
     if (action === 'threads') {
+      if (!query.username) {
+        return jsonResponse(400, { error: 'Missing username.', status: 400 })
+      }
       let data = await hn.getUserThreads(query.username, username)
       return jsonResponse(200, data)
     }
