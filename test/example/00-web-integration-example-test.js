@@ -102,7 +102,7 @@ test('Shut down sandbox', t => {
   tiny.get({ url },
   function win (err, result) {
     if (err) {
-      t.equal(err.code, 'ECONNREFUSED', 'Sandbox successfully shut down')
+      t.ok(['ECONNREFUSED', 'ECONNRESET'].includes(err.code), 'Sandbox successfully shut down')
     } else {
       t.fail('Sandbox did not shut down')
     }

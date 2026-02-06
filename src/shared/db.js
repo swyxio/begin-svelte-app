@@ -4,13 +4,13 @@ const data = require('@begin/data')
 const TABLE = 'data'
 
 const KEY_PREFIXES = {
-  user: 'user#',
-  session: 'session#',
-  item: 'item#',
-  vote: 'vote#',
-  favorite: 'fav#',
-  hide: 'hide#',
-  flag: 'flag#'
+  user: 'user:',
+  session: 'session:',
+  item: 'item:',
+  vote: 'vote:',
+  favorite: 'fav:',
+  hide: 'hide:',
+  flag: 'flag:'
 }
 
 function nowISO () {
@@ -30,8 +30,18 @@ async function getByKey (key) {
   return data.get({ table: TABLE, key })
 }
 
+function sanitizeRecord (record) {
+  return Object.entries(record).reduce((acc, [key, value]) => {
+    if (value === '' || value === null || value === undefined) {
+      return acc
+    }
+    acc[key] = value
+    return acc
+  }, {})
+}
+
 async function setRecord (record) {
-  return data.set({ table: TABLE, ...record })
+  return data.set({ table: TABLE, ...sanitizeRecord(record) })
 }
 
 async function deleteRecord (key) {
@@ -51,5 +61,6 @@ module.exports = {
   getByKey,
   setRecord,
   deleteRecord,
-  filterByPrefix
+  filterByPrefix,
+  sanitizeRecord
 }

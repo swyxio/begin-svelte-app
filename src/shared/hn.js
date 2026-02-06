@@ -47,10 +47,18 @@ function sanitizeUser (user) {
 }
 
 function parseItemId (record) {
-  if (!record || !record.key) return null
+  if (!record) return null
   if (record.itemId) return record.itemId
+  if (record.id) return record.id
+  if (!record.key) return null
+  if (record.key.startsWith(KEY_PREFIXES.item)) {
+    return record.key.slice(KEY_PREFIXES.item.length)
+  }
   let parts = record.key.split('#')
-  return parts[parts.length - 1]
+  if (parts.length > 1) return parts[parts.length - 1]
+  parts = record.key.split(':')
+  if (parts.length > 1) return parts[parts.length - 1]
+  return record.key
 }
 
 function ensureItemId (record) {
@@ -67,13 +75,13 @@ function getUserState (records, username) {
   }
   if (!username) return state
 
-  filterByPrefix(records, `${KEY_PREFIXES.vote}${username}#`)
+  filterByPrefix(records, `${KEY_PREFIXES.vote}${username}:`)
     .forEach(record => state.votes.add(parseItemId(record)))
-  filterByPrefix(records, `${KEY_PREFIXES.favorite}${username}#`)
+  filterByPrefix(records, `${KEY_PREFIXES.favorite}${username}:`)
     .forEach(record => state.favorites.add(parseItemId(record)))
-  filterByPrefix(records, `${KEY_PREFIXES.hide}${username}#`)
+  filterByPrefix(records, `${KEY_PREFIXES.hide}${username}:`)
     .forEach(record => state.hidden.add(parseItemId(record)))
-  filterByPrefix(records, `${KEY_PREFIXES.flag}${username}#`)
+  filterByPrefix(records, `${KEY_PREFIXES.flag}${username}:`)
     .forEach(record => state.flags.add(parseItemId(record)))
 
   return state
@@ -180,13 +188,13 @@ async function getUserProfile (username, viewer) {
   }
   let state = getUserState(records, viewer)
   let submissions = records
-    .filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
+    .filter(record => ITEM_TYPES.includes(record.type))
     .filter(record => record.by === username && record.type !== 'comment')
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(record => serializeItem(record, state, viewer))
 
   let comments = records
-    .filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
+    .filter(record => ITEM_TYPES.includes(record.type))
     .filter(record => record.by === username && record.type === 'comment')
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(record => serializeItem(record, state, viewer))
@@ -206,7 +214,7 @@ async function getUserThreads (username, viewer) {
   }
 
   let state = getUserState(records, viewer)
-  let items = records.filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
+  let items = records.filter(record => ITEM_TYPES.includes(record.type))
   let comments = items
     .filter(record => record.by === username && record.type === 'comment')
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -230,8 +238,8 @@ async function getUserThreads (username, viewer) {
 async function getUserFavorites (username, viewer) {
   let records = await listAll()
   let state = getUserState(records, viewer)
-  let favorites = filterByPrefix(records, `${KEY_PREFIXES.favorite}${username}#`)
-  let items = records.filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
+  let favorites = filterByPrefix(records, `${KEY_PREFIXES.favorite}${username}:`)
+  let items = records.filter(record => ITEM_TYPES.includes(record.type))
   let favoritesList = favorites.map(record => {
     let itemId = parseItemId(record)
     let item = items.find(entry => ensureItemId(entry) === itemId)
@@ -246,7 +254,7 @@ async function getUserFavorites (username, viewer) {
 async function getUserHidden (username, viewer) {
   let records = await listAll()
   let state = getUserState(records, viewer)
-  let hidden = filterByPrefix(records, `${KEY_PREFIXES.hide}${username}#`)
+  let hidden = filterByPrefix(records, `${KEY_PREFIXES.hide}${username}:`)
   let items = records.filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
   let hiddenList = hidden.map(record => {
     let itemId = parseItemId(record)
@@ -263,7 +271,7 @@ async function listItems ({ sort = 'top', type, page = 1, username }) {
   let records = await listAll()
   let state = getUserState(records, username)
   let items = records
-    .filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
+    .filter(record => ITEM_TYPES.includes(record.type))
     .filter(record => record.type !== 'comment')
 
   if (type) {
@@ -294,13 +302,12 @@ async function listItems ({ sort = 'top', type, page = 1, username }) {
 async function getItemDetail ({ id, username }) {
   let records = await listAll()
   let state = getUserState(records, username)
-  let item = records.find(record => record.key === `${KEY_PREFIXES.item}${id}`)
+  let item = await getByKey(`${KEY_PREFIXES.item}${id}`)
   if (!item) {
     throw createError('Item not found.', 404)
   }
 
   let comments = records
-    .filter(record => record.key && record.key.startsWith(KEY_PREFIXES.item))
     .filter(record => record.type === 'comment' && record.rootId === id)
 
   return {
@@ -404,7 +411,7 @@ async function voteItem ({ itemId, username }) {
     throw createError('You cannot vote for your own item.')
   }
 
-  let voteKey = `${KEY_PREFIXES.vote}${username}#${itemId}`
+  let voteKey = `${KEY_PREFIXES.vote}${username}:${itemId}`
   let existing = await getByKey(voteKey)
   if (existing) {
     throw createError('Already voted.')
@@ -431,7 +438,7 @@ async function unvoteItem ({ itemId, username }) {
   if (!username) {
     throw createError('You must be logged in to vote.')
   }
-  let voteKey = `${KEY_PREFIXES.vote}${username}#${itemId}`
+  let voteKey = `${KEY_PREFIXES.vote}${username}:${itemId}`
   let existing = await getByKey(voteKey)
   if (!existing) {
     throw createError('Vote not found.', 404)
@@ -454,7 +461,7 @@ async function setFavorite ({ itemId, username, enabled }) {
   if (!username) {
     throw createError('You must be logged in to favorite.')
   }
-  let favoriteKey = `${KEY_PREFIXES.favorite}${username}#${itemId}`
+  let favoriteKey = `${KEY_PREFIXES.favorite}${username}:${itemId}`
   if (enabled) {
     await setRecord({
       key: favoriteKey,
@@ -471,7 +478,7 @@ async function setHidden ({ itemId, username, enabled }) {
   if (!username) {
     throw createError('You must be logged in to hide.')
   }
-  let hideKey = `${KEY_PREFIXES.hide}${username}#${itemId}`
+  let hideKey = `${KEY_PREFIXES.hide}${username}:${itemId}`
   if (enabled) {
     await setRecord({
       key: hideKey,
@@ -488,7 +495,7 @@ async function flagItem ({ itemId, username, reason }) {
   if (!username) {
     throw createError('You must be logged in to flag.')
   }
-  let flagKey = `${KEY_PREFIXES.flag}${username}#${itemId}`
+  let flagKey = `${KEY_PREFIXES.flag}${username}:${itemId}`
   let existing = await getByKey(flagKey)
   if (existing) {
     throw createError('Already flagged.')

@@ -20,8 +20,6 @@ exports.handler = async function http (req) {
     let session = await getSessionFromRequest(req)
     let username = session ? session.username : null
 
-    console.log('hn-api-get', JSON.stringify({ action, username, query }))
-
     if (!action) {
       return jsonResponse(400, { error: 'Missing action.' })
     }

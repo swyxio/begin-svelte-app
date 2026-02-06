@@ -1,3 +1,4 @@
+const querystring = require('querystring')
 const hn = require('../../shared/hn')
 const {
   getSessionFromRequest,
@@ -25,10 +26,13 @@ function parseBody (req) {
     body = body.toString()
   }
   if (typeof body === 'string') {
+    if (req.isBase64Encoded) {
+      body = Buffer.from(body, 'base64').toString('utf-8')
+    }
     try {
       return JSON.parse(body)
     } catch (error) {
-      return {}
+      return querystring.parse(body)
     }
   }
   return body
@@ -40,8 +44,6 @@ exports.handler = async function http (req) {
     let action = body.action
     let session = await getSessionFromRequest(req)
     let username = session ? session.username : null
-
-    console.log('hn-api-post', JSON.stringify({ action, username }))
 
     if (!action) {
       return jsonResponse(400, { error: 'Missing action.' })
